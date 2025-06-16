@@ -728,8 +728,8 @@ tbody tr {
   min-height: 220px;
   max-height: 320px;
   object-fit: cover;
-  filter: blur(8px) brightness(0.6);
-  opacity: 0.85;
+  filter: blur(0.01px) brightness(0.95);
+  opacity: 0.96;
   z-index: 0;
   border-radius: 0 0 32px 32px;
 }
@@ -758,6 +758,7 @@ tbody tr {
   pointer-events: auto;
   margin: 0 auto;
 }
+  
 .banner-hero-logo {
   width: 90px;
   height: 90px;
@@ -842,52 +843,47 @@ tbody tr {
   box-shadow: none !important;
 }
 }
-.banner-hero {
+#toggleMismoTransporte {
   position: relative;
-  width: 100vw;
-  height: 100vh;
-  min-height: 100vh;
-  max-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 0;
-  margin: 0;
+  font-weight: 700;
+  border: 2.5px solid #00e6ff;
+  background: linear-gradient(90deg, #00bcd4 60%, #1e88e5 100%);
+  color: #fff;
+  box-shadow: 0 2px 12px #00e6ff33;
+  transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+  outline: none;
+  min-width: 320px;
+  padding-right: 48px;
+}
+#toggleMismoTransporte.btn-outline-info {
+  background: #0b111f;
+  color: #00e6ff;
+  border: 2.5px solid #00e6ff;
   box-shadow: none;
-  background: none;
-  z-index: 1;
 }
-.banner-hero video {
+#toggleMismoTransporte.btn-info {
+  background: linear-gradient(90deg, #00e6ff 60%, #00bcd4 100%);
+  color: #0b111f;
+  border: 2.5px solid #00e6ff;
+  box-shadow: 0 4px 18px #00e6ff44;
+}
+#toggleMismoTransporte .toggle-icon {
   position: absolute;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  filter: blur(8px) brightness(0.6);
-  opacity: 0.85;
-  z-index: 0;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5em;
+  transition: color 0.2s;
 }
-.banner-hero-overlay {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+#toggleMismoTransporte.btn-info .toggle-icon {
+  color: #10b981;
+  text-shadow: 0 0 8px #10b98188;
 }
-.banner-hero-content {
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  background: rgba(10,20,40,0.72);
-  border-radius: 22px;
-  padding: 32px 38px;
-  box-shadow: 0 4px 32px #00e6ff22;
-  pointer-events: auto;
+#toggleMismoTransporte.btn-outline-info .toggle-icon {
+  color: #888;
+  text-shadow: none;
 }
+
   </style>
 </head>
 <body> 
@@ -927,17 +923,15 @@ function togglePermitirMismoTransporte() {
   permitirMismoTransporte = !permitirMismoTransporte;
   localStorage.setItem('permitirMismoTransporte', permitirMismoTransporte);
   const btn = document.getElementById('toggleMismoTransporte');
+  const icon = btn.querySelector('.toggle-icon i');
   if (permitirMismoTransporte) {
     btn.classList.remove('btn-outline-info');
     btn.classList.add('btn-info');
-    btn.innerHTML = '<i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte <i class="fas fa-toggle-on"></i>';
-    if (document.getElementById('tab-mismoTransporte').classList.contains('active')) {
-      mostrarTablaMismoTransporte();
-    }
+    icon.className = 'fas fa-toggle-on';
   } else {
     btn.classList.remove('btn-info');
     btn.classList.add('btn-outline-info');
-    btn.innerHTML = '<i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte <i class="fas fa-toggle-off"></i>';
+    icon.className = 'fas fa-toggle-off';
   }
 }
   
@@ -1181,8 +1175,12 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
     <i class="fas fa-chart-pie"></i> Resumen
   </button>
   <button id="toggleMismoTransporte" class="btn btn-outline-info" type="button" onclick="togglePermitirMismoTransporte()">
-    <i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte
-  </button>
+  <span style="margin-right: 12px;"><i class="fas fa-exchange-alt"></i></span>
+  Permitir mismo tipo de transporte
+  <span class="toggle-icon">
+    <i class="fas fa-toggle-off"></i>
+  </span>
+</button>
 </div>
 </div>
     <div class="main-content">
