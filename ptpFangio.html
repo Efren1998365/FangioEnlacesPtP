@@ -8,6 +8,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="img/favicon-32x32-light.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="img/favicon-32x32-light.png" sizes="32x32" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" href="img/favicon-32x32-dark.png" sizes="32x32" media="(prefers-color-scheme: dark)">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -1101,8 +1104,15 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
       <line x1="8" y1="0" x2="0" y2="8" stroke="#e53935" stroke-width="0.7" opacity="0.18"/>
     </pattern>
   </defs>
+  <!-- Sombra de la torre -->
+  <ellipse cx="24" cy="175" rx="13" ry="4" fill="#000" opacity="0.12"/>
+  <!-- Base sólida con volumen -->
+  <ellipse cx="24" cy="170" rx="16" ry="8" fill="#b0bec5"/>
+  <ellipse cx="24" cy="170" rx="10" ry="4" fill="#e53935" opacity="0.7"/>
+  <!-- Torre principal -->
   <polygon points="24,10 6,170 42,170" fill="url(#torreMetalB)" stroke="#fff" stroke-width="6"/>
   <polygon points="24,20 12,165 36,165" fill="url(#rejillaB)" opacity="0.5"/>
+  <!-- Celosía extra (más realismo) -->
   <line x1="24" y1="10" x2="24" y2="170" stroke="#e53935" stroke-width="4"/>
   <line x1="12" y1="50" x2="36" y2="130" stroke="#e53935" stroke-width="2"/>
   <line x1="36" y1="50" x2="12" y2="130" stroke="#e53935" stroke-width="2"/>
@@ -1112,11 +1122,21 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   <line x1="10" y1="90" x2="38" y2="90" stroke="#fff" stroke-width="2" opacity="0.8"/>
   <line x1="12" y1="130" x2="36" y2="130" stroke="#fff" stroke-width="2" opacity="0.8"/>
   <line x1="6" y1="170" x2="42" y2="170" stroke="#e53935" stroke-width="5"/>
+  <!-- Antena superior con pararrayos -->
   <rect x="20" y="2" width="8" height="16" rx="2" fill="#fff" opacity="0.85"/>
   <rect x="16" y="0" width="16" height="4" rx="2" fill="#e53935" opacity="0.9"/>
+  <!-- Pararrayos (detalle extra) -->
+  <rect x="23" y="-8" width="2" height="10" rx="1" fill="#b0bec5"/>
+  <circle cx="24" cy="-8" r="2" fill="#ffd600" stroke="#b0bec5" stroke-width="0.7"/>
+  <!-- Equipos en plataformas (detalles extra) -->
   <ellipse cx="32" cy="60" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
   <ellipse cx="16" cy="100" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
   <ellipse cx="32" cy="140" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+  <!-- Remaches en la estructura -->
+  <circle cx="24" cy="50" r="1.1" fill="#b0bec5"/>
+  <circle cx="24" cy="90" r="1.1" fill="#b0bec5"/>
+  <circle cx="24" cy="130" r="1.1" fill="#b0bec5"/>
+  <circle cx="24" cy="170" r="1.1" fill="#b0bec5"/>
 </svg>
   </div>
   <div style="flex:1; min-width:0;">
@@ -1132,18 +1152,25 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
     </div>
 <svg viewBox="0 0 48 180" style="height:320px; width:auto; display:block;" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="torreMetalA" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="torreMetalB" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
       <stop offset="100%" stop-color="#e53935" stop-opacity="0.85"/>
     </linearGradient>
-    <pattern id="rejillaA" width="8" height="8" patternUnits="userSpaceOnUse">
+    <pattern id="rejillaB" width="8" height="8" patternUnits="userSpaceOnUse">
       <rect x="0" y="0" width="8" height="8" fill="none"/>
       <line x1="0" y1="0" x2="8" y2="8" stroke="#e53935" stroke-width="0.7" opacity="0.18"/>
       <line x1="8" y1="0" x2="0" y2="8" stroke="#e53935" stroke-width="0.7" opacity="0.18"/>
     </pattern>
   </defs>
-  <polygon points="24,10 6,170 42,170" fill="url(#torreMetalA)" stroke="#fff" stroke-width="6"/>
-  <polygon points="24,20 12,165 36,165" fill="url(#rejillaA)" opacity="0.5"/>
+  <!-- Sombra de la torre -->
+  <ellipse cx="24" cy="175" rx="13" ry="4" fill="#000" opacity="0.12"/>
+  <!-- Base sólida con volumen -->
+  <ellipse cx="24" cy="170" rx="16" ry="8" fill="#b0bec5"/>
+  <ellipse cx="24" cy="170" rx="10" ry="4" fill="#e53935" opacity="0.7"/>
+  <!-- Torre principal -->
+  <polygon points="24,10 6,170 42,170" fill="url(#torreMetalB)" stroke="#fff" stroke-width="6"/>
+  <polygon points="24,20 12,165 36,165" fill="url(#rejillaB)" opacity="0.5"/>
+  <!-- Celosía extra (más realismo) -->
   <line x1="24" y1="10" x2="24" y2="170" stroke="#e53935" stroke-width="4"/>
   <line x1="12" y1="50" x2="36" y2="130" stroke="#e53935" stroke-width="2"/>
   <line x1="36" y1="50" x2="12" y2="130" stroke="#e53935" stroke-width="2"/>
@@ -1153,11 +1180,21 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   <line x1="10" y1="90" x2="38" y2="90" stroke="#fff" stroke-width="2" opacity="0.8"/>
   <line x1="12" y1="130" x2="36" y2="130" stroke="#fff" stroke-width="2" opacity="0.8"/>
   <line x1="6" y1="170" x2="42" y2="170" stroke="#e53935" stroke-width="5"/>
+  <!-- Antena superior con pararrayos -->
   <rect x="20" y="2" width="8" height="16" rx="2" fill="#fff" opacity="0.85"/>
   <rect x="16" y="0" width="16" height="4" rx="2" fill="#e53935" opacity="0.9"/>
+  <!-- Pararrayos (detalle extra) -->
+  <rect x="23" y="-8" width="2" height="10" rx="1" fill="#b0bec5"/>
+  <circle cx="24" cy="-8" r="2" fill="#ffd600" stroke="#b0bec5" stroke-width="0.7"/>
+  <!-- Equipos en plataformas (detalles extra) -->
   <ellipse cx="32" cy="60" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
   <ellipse cx="16" cy="100" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
   <ellipse cx="32" cy="140" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+  <!-- Remaches en la estructura -->
+  <circle cx="24" cy="50" r="1.1" fill="#b0bec5"/>
+  <circle cx="24" cy="90" r="1.1" fill="#b0bec5"/>
+  <circle cx="24" cy="130" r="1.1" fill="#b0bec5"/>
+  <circle cx="24" cy="170" r="1.1" fill="#b0bec5"/>
 </svg>
   </div>
 </div>
