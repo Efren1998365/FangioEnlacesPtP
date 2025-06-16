@@ -1172,6 +1172,9 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   <button class="tab-button" onclick="mostrarPestana('resumen', event)">
     <i class="fas fa-chart-pie"></i> Resumen
   </button>
+   <button id="toggleMismoTransporte" class="btn btn-outline-info" type="button" onclick="togglePermitirMismoTransporte()">
+    <i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte
+  </button>
 </div>
 </div>
     <div class="main-content">
@@ -1296,9 +1299,6 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   </button>
   <button class="btn btn-primary" onclick="abrirPanelEquiposAntenas()">
     <i class="fas fa-broadcast-tower"></i> Gestión Equipos/Antenas
-  </button>
-  <button id="toggleMismoTransporte" class="btn btn-outline-info" type="button" onclick="togglePermitirMismoTransporte()">
-    <i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte
   </button>
 </div>
       </div>
