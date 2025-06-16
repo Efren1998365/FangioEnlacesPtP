@@ -1,0 +1,4480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fangio Telecom - Gestor de Enlaces PtP con Análisis de Factibilidad</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+  .tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+:root {
+  --accent: #00bcd4;
+  --primary: #1e88e5;
+  --dark-bg: #0b111f;
+  --text-light: #e0f7fa;
+  --glass: rgba(255,255,255,0.10);
+  --radius: 16px;
+}
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+body, html {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #081421 0%, #122434 100%);
+  color: var(--text-light);
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: var(--glass);
+  border-radius: var(--radius);
+   background: none !important;
+  box-shadow: none !important;
+}
+.header {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+.logo-container .logo-wrapper {
+  width: 110px;
+  height: 110px;
+}
+.logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,188,212,0.10);
+}
+.company-info h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent);
+  margin-bottom: 10px;
+  background: none;
+  -webkit-text-fill-color: unset;
+}
+.company-info .subtitle {
+  font-size: 1.2rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 10px;
+  padding-left: 0;
+}
+.premium-badge {
+  display: none;
+}
+.main-content {
+  background: rgba(11, 17, 31, 0.98);
+  border-radius: 20px;
+  box-shadow: 0 6px 32px 0 rgba(0,188,212,0.10);
+  border: 2px solid var(--accent);
+  padding: 32px 28px 18px 28px;
+  margin-top: 24px;
+  color: var(--text-light);
+}
+.tabs {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 32px;
+  justify-content: center;
+}
+.tab-button {
+  background: rgba(0,188,212,0.12);
+  color: #e0f7fa;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(30,136,229,0.08);
+}
+.tab-button.active, .tab-button:hover {
+  background: linear-gradient(135deg, #00bcd4 60%, #1e88e5 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(30,136,229,0.18);
+}
+.frecuencia-info {
+  background: rgba(0,188,212,0.08);
+  border: 2px solid #00bcd4;
+  border-radius: 16px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 24px;
+  padding: 18px 18px 10px 18px;
+}
+.file-upload {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 2px dashed rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.file-upload label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #00bcd4, #1e88e5);
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0,188,212,0.13);
+}
+.file-upload label:hover {
+  background: linear-gradient(135deg, #1e88e5, #00bcd4);
+}
+.file-upload input[type="file"] {
+  display: none;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px 32px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  margin-top: 0;
+  max-width: 1150px;
+  width: 100%;
+  box-shadow: none;
+  border: none;
+}
+@media (max-width: 1200px) {
+  .form-grid { grid-template-columns: repeat(2, 1fr); max-width: 900px; }
+}
+@media (max-width: 900px) {
+  .main-content { padding: 16px 4px 10px 4px; max-width: 100vw; }
+  .form-grid { grid-template-columns: 1fr; padding: 0; max-width: 100vw; }
+}
+.form-grid label {
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+  letter-spacing: 0.5px;
+}
+.form-grid input, .form-grid select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--primary);
+  margin-top: 4px;
+  font-size: 1rem;
+  background: #1a2636;
+  color: var(--text-light);
+  outline: none;
+  transition: background 0.2s, border 0.2s;
+  box-shadow: 0 1px 4px 0 rgba(30,136,229,0.08);
+}
+.form-grid input:focus, .form-grid select:focus {
+  background: #22304a;
+  border-color: var(--accent);
+}
+.form-grid input[readonly] {
+  background: #16202e;
+  color: #b2ebf2;
+  border-style: dashed;
+}
+.action-buttons .btn,
+.btn {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  padding: 14px 30px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1.1rem;
+  border: none;
+  margin: 6px 8px 6px 0;
+  transition: background 0.3s, color 0.3s;
+  box-shadow: 0 2px 12px rgba(0,188,212,0.10);
+}
+.btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.table-container {
+  background: rgba(11, 17, 31, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 6px 32px 0 rgba(0,188,212,0.10);
+  border: 2px solid var(--accent);
+  padding: 12px;
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: transparent;
+  color: var(--text-light);
+}
+th, td {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(0,188,212,0.10);
+}
+th {
+  background: rgba(0,188,212,0.10);
+  color: var(--accent);
+  font-weight: 700;
+}
+tr:hover {
+  background: rgba(0,188,212,0.08);
+}
+tr.selected {
+  background: var(--accent) !important;
+  color: #000 !important;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  background: rgba(0,188,212,0.08);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #00bcd4 30%, #1e88e5 100%);
+  border-radius: 8px;
+}
+@media (max-width: 768px) {
+  .container { padding: 10px; }
+  .main-content { padding: 10px; }
+  .form-grid { gap: 12px 8px; }
+  th, td { padding: 8px 6px; }
+}
+.fangio-header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: linear-gradient(120deg, #0b111f 60%, #1e88e5 120%);
+  border-radius: 24px;
+  box-shadow: 0 6px 32px 0 rgba(0,188,212,0.10);
+  padding: 24px 40px 24px 32px;
+  margin-bottom: 36px;
+  position: relative;
+  overflow: hidden;
+  min-height: 140px;
+  justify-content: flex-start;
+}
+.fangio-logo-box {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,188,212,0.10);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  min-height: 110px;
+}
+.fangio-logo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  display: block;
+}
+.fangio-title-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 2;
+}
+.fangio-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #00e6ff;
+  text-shadow: 0 0 18px #00e6ff55, 0 2px 8px #1e88e5cc;
+  margin: 0 0 10px 0;
+  letter-spacing: 2px;
+}
+.fangio-subtitle {
+  font-size: 1.3rem;
+  color: #2196f3;
+  font-weight: 600;
+  margin-top: 0;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 8px #1e88e555;
+}
+.fangio-header-decoration {
+  position: absolute;
+  right: -80px;
+  top: -60px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle at 60% 40%, #00bcd4 0%, #1e88e5 60%, transparent 100%);
+  opacity: 0.18;
+  z-index: 1;
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .fangio-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px 10px 18px 10px;
+    min-height: 0;
+    gap: 18px;
+  }
+  .fangio-header-decoration {
+    width: 180px;
+    height: 180px;
+    right: -40px;
+    top: -30px;
+  }
+  .fangio-logo-box {
+    min-width: 70px;
+    min-height: 70px;
+    padding: 6px 8px;
+  }
+  .fangio-logo-img {
+    width: 48px;
+    height: 48px;
+  }
+  .fangio-title {
+    font-size: 1.5rem;
+  }
+  .fangio-subtitle {
+    font-size: 1rem;
+  }
+}
+.btn-institucional {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #00bcd4 60%, #1e88e5 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.08rem;
+  padding: 12px 26px;
+  border-radius: 14px;
+  text-decoration: none;
+  box-shadow: 0 2px 12px rgba(30,136,229,0.10);
+  margin-left: auto;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  border: none;
+  outline: none;
+}
+.btn-institucional:hover {
+  background: linear-gradient(90deg, #1e88e5 60%, #00bcd4 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(30,136,229,0.18);
+  text-decoration: none;
+}
+@media (max-width: 700px) {
+  .btn-institucional {
+   display: none;
+  }
+}
+.fangio-tower-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 160px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.18;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+.fangio-tower-bg svg {
+  height: 90%;
+  width: auto;
+  min-width: 80px;
+  max-width: 120px;
+  display: block;
+}
+@media (max-width: 900px) {
+  .fangio-tower-bg {
+    opacity: 0.10;
+    width: 80px;
+  }
+  .fangio-tower-bg svg {
+    min-width: 40px;
+    max-width: 60px;
+  }
+}
+#mapa-enlaces {
+  margin-left: 340px; 
+}
+table, th, td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+tbody tr {
+  height: 36px;
+  min-height: 36px;
+  max-height: 40px;
+}
+#panel-detalle-enlace {
+  display: none;
+  position: fixed;
+  right: 0;
+  top: 120px;
+  width: 340px;
+  max-width: 95vw;
+  height: calc(100vh - 120px); 
+  background: #fff;
+  color: #222;
+  border-radius: 18px 0 0 18px;
+  box-shadow: 2px 0 18px #00bcd455;
+  z-index: 2000;
+  padding: 24px 18px 24px 18px;
+  overflow-y: auto;
+  font-size: 1rem;
+}
+#mapa-enlaces {
+  margin-left: 0 !important;
+  margin-right: 340px !important;
+}
+@media (max-width: 700px) {
+  #panel-detalle-enlace {
+    width: 98vw;
+    border-radius: 0 0 18px 18px;
+    height: auto;
+    max-height: 80vh;
+  }
+  #mapa-enlaces {
+    margin-left: 0 !important;
+  }
+}
+#panel-detalle-enlace {
+  z-index: 999999 !important;
+  top: 0 !important;
+  height: 100vh !important;
+}
+#detalle-enlace-contenido {
+  padding-bottom: 40px;
+}
+#panel-detalle-enlace {
+  top: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: auto !important;
+}
+.table-container {
+  max-width: 100vw;
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+#tab-mismoTransporte .table-container {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+#tab-mismoTransporte {
+  overflow: visible !important;
+}
+#tab-mismoTransporte table {
+  font-size: 13px;
+  border-radius: 12px;
+  background: #101a2a;
+}
+#tab-mismoTransporte th, #tab-mismoTransporte td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #1e88e533;
+  white-space: nowrap;
+}
+#tab-mismoTransporte th {
+  background: #0b111f;
+  color: #00e6ff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+#tab-mismoTransporte tr:hover {
+  background: #1e88e522;
+}
+#tab-mismoTransporte .table-container {
+  max-width: 100vw;
+  overflow-x: auto;
+  background: #101a2a;
+  border-radius: 14px;
+  border: 1.5px solid #00e6ff44;
+  box-shadow: 0 2px 18px #00e6ff22;
+  margin-bottom: 18px;
+  padding: 0;
+}
+#tab-mismoTransporte table {
+  font-size: 13px;
+  border-radius: 12px;
+  background: #101a2a;
+  min-width: 1200px;
+}
+#tab-mismoTransporte th, #tab-mismoTransporte td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #1e88e533;
+  white-space: nowrap;
+  text-align: center;
+}
+#tab-mismoTransporte th {
+  background: #0b111f;
+  color: #00e6ff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+#tab-mismoTransporte tr:hover {
+  background: #1e88e522;
+}
+#tab-mismoTransporte td:last-child {
+  min-width: 120px;
+  max-width: 140px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#tab-mismoTransporte button.btn-info {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+#tab-mismoTransporte .action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+#tab-mismoTransporte .enlaces-counter {
+  margin-bottom: 8px;
+  font-size: 1.08rem;
+  color: #00e6ff;
+  font-weight: 600;
+}
+#tab-mismoTransporte table {
+  font-size: 13px;
+  border-radius: 12px;
+  background: #101a2a;
+}
+#tab-mismoTransporte th, #tab-mismoTransporte td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #1e88e533;
+  white-space: nowrap;
+}
+#tab-mismoTransporte th {
+  background: #0b111f;
+  color: #00e6ff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+#tab-mismoTransporte tr:hover {
+  background: #1e88e522;
+}
+.fangio-video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 16/9;
+  margin: 32px auto 0 auto;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 0 32px #00e6ff66, 0 2px 18px #00e6ff33;
+  background: linear-gradient(135deg, #0b111f 60%, #1e88e5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fangio-video-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 0 60px 10px #00e6ff88, 0 0 0 8px #00e6ff33 inset;
+  animation: fangio-glow 2.5s infinite alternate;
+}
+@keyframes fangio-glow {
+  0% { box-shadow: 0 0 60px 10px #00e6ff88, 0 0 0 8px #00e6ff33 inset; }
+  100% { box-shadow: 0 0 90px 18px #00e6ffcc, 0 0 0 12px #00e6ff44 inset; }
+}
+.fangio-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 22px;
+  z-index: 2;
+  background: #000;
+  display: block;
+}
+@media (max-width: 700px) {
+  .fangio-video-wrapper {
+    max-width: 98vw;
+    border-radius: 12px;
+  }
+  .fangio-video-glow {
+    border-radius: 12px;
+  }
+  .fangio-video {
+    border-radius: 12px;
+  }
+}
+.video-hero-bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 40px auto 32px auto;
+  background: linear-gradient(135deg, #101a2a 60%, #1e88e5 100%);
+  border-radius: 24px;
+  box-shadow: 0 8px 40px #00e6ff22, 0 2px 18px #00e6ff11;
+  padding: 0;
+  overflow: hidden;
+}
+.video-hero {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 24px;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 2px 24px #000a;
+}
+@media (max-width: 900px) {
+  .video-hero-bg { max-width: 98vw; border-radius: 12px; }
+  .video-hero { border-radius: 12px; }
+}
+.video-banner {
+  width: 100%;
+  max-width: 1200px;
+  height: 280px;
+  margin: 32px auto 32px auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: none;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video-banner-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+  box-shadow: none;
+  background: #000;
+}
+.video-banner-overlay {
+  position: absolute;
+  left: 0; top: 0; width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: rgba(0,0,0,0.18);
+  text-shadow: 0 2px 16px #000;
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .video-banner { height: 180px; }
+  .video-banner-overlay { font-size: 1.2rem; }
+}
+.banner-hero {
+  position: relative;
+  width: 100%;
+  min-height: 260px;
+  max-height: 340px;
+  overflow: hidden;
+  border-radius: 0 0 32px 32px;
+  box-shadow: 0 8px 40px #00e6ff22, 0 2px 18px #00e6ff11;
+  margin-bottom: 32px;
+}
+.banner-hero-video {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  max-height: 340px;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.85) contrast(1.15) saturate(1.1);
+  box-shadow: 0 0 48px #00e6ff33, 0 2px 24px #1e88e555;
+  transition: filter 0.3s;
+}
+.banner-hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(11,17,31,0.55) 60%, rgba(30,136,229,0.18) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+.banner-hero-content {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  z-index: 3;
+  background: rgba(10,20,40,0.72);
+  border-radius: 22px;
+  padding: 32px 38px;
+  box-shadow: 0 4px 32px #00e6ff22;
+  pointer-events: auto;
+}
+.banner-hero-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 2px 12px #00e6ff33;
+  margin-right: 18px;
+}
+.banner-hero-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #00e6ff;
+  text-shadow: 0 0 18px #00e6ff55, 0 2px 8px #1e88e5cc;
+  margin: 0 0 10px 0;
+  letter-spacing: 2px;
+}
+.banner-hero-subtitle {
+  font-size: 1.3rem;
+  color: #2196f3;
+  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 8px #1e88e555;
+}
+.banner-hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #00bcd4 60%, #1e88e5 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.08rem;
+  padding: 12px 26px;
+  border-radius: 14px;
+  text-decoration: none;
+  box-shadow: 0 2px 12px rgba(30,136,229,0.10);
+  margin-top: 8px;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  border: none;
+  outline: none;
+}
+.banner-hero-link:hover {
+  background: linear-gradient(90deg, #1e88e5 60%, #00bcd4 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(30,136,229,0.18);
+  text-decoration: none;
+}
+@media (max-width: 900px) {
+  .banner-hero-content {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 18px 8px;
+    border-radius: 14px;
+  }
+  .banner-hero-logo {
+    margin: 0 0 10px 0;
+  }
+  .banner-hero-title {
+    font-size: 1.7rem;
+  }
+  .banner-hero-subtitle {
+    font-size: 1.05rem;
+  }
+  .banner-hero {
+    min-height: 160px;
+    max-height: 220px;
+    border-radius: 0 0 18px 18px;
+  }
+  .banner-hero-video {
+    min-height: 160px;
+    max-height: 220px;
+  }
+}
+.container {
+  .container,
+.fangio-header,
+.fangio-header-decoration,
+.banner-hero,
+.banner-hero::before,
+.banner-hero::after {
+  background: none !important;
+  box-shadow: none !important;
+}
+}
+  </style>
+</head>
+<body> 
+  <script>
+// Redirige a login.html si no hay sesión activa
+if (localStorage.getItem('fangioSesion') !== 'activa') {
+  window.location.href = 'login.html';
+}
+</script>
+
+<button id="logoutBtn" style="
+  display:none;
+  position:fixed;
+  top:18px;
+  right:24px;
+  z-index:9999;
+  background: linear-gradient(90deg,#00bcd4 60%,#1e88e5 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 12px 26px 12px 18px;
+  border-radius: 12px;
+  font-size: 1.08rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+">
+  <i class="fas fa-sign-out-alt" style="font-size:1.2em;"></i> Cerrar sesión
+  
+</button>
+
+<script>
+let permitirMismoTransporte = localStorage.getItem('permitirMismoTransporte') === 'true';
+
+function togglePermitirMismoTransporte() {
+  permitirMismoTransporte = !permitirMismoTransporte;
+  localStorage.setItem('permitirMismoTransporte', permitirMismoTransporte);
+  const btn = document.getElementById('toggleMismoTransporte');
+  if (permitirMismoTransporte) {
+    btn.classList.remove('btn-outline-info');
+    btn.classList.add('btn-info');
+    btn.innerHTML = '<i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte <i class="fas fa-toggle-on"></i>';
+    // Si la pestaña "Mismo Transporte" está activa, actualiza la tabla
+    if (document.getElementById('tab-mismoTransporte').classList.contains('active')) {
+      mostrarTablaMismoTransporte();
+    }
+  } else {
+    btn.classList.remove('btn-info');
+    btn.classList.add('btn-outline-info');
+    btn.innerHTML = '<i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte <i class="fas fa-toggle-off"></i>';
+  }
+}
+  
+</script>
+<script>
+// 1. Exportación/Importación Pathloss
+function importarArchivoPathloss() {
+  // Crear input file temporal
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.pl5,.csv';
+  
+  input.onchange = async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      if (file.name.endsWith('.csv')) {
+        // Procesar CSV
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const text = e.target.result;
+          const lines = text.split('\n');
+          // Procesar líneas del CSV
+          processPathlossCSV(lines);
+        };
+        reader.readAsText(file);
+      } else if (file.name.endsWith('.pl5')) {
+        // Procesar PL5
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const buffer = e.target.result;
+          // Procesar archivo PL5 
+          processPathlossFile(buffer);
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    } catch (error) {
+      console.error('Error al importar archivo:', error);
+      alert('Error al importar el archivo. Verifica el formato.');
+    }
+  };
+
+  input.click();
+}
+
+function processPathlossCSV(lines) {
+
+  try {
+    lines.forEach(line => {
+      const columns = line.split(',');
+    });
+    alert('Archivo CSV importado correctamente');
+  } catch (error) {
+    alert('Error al procesar el archivo CSV');
+  }
+}
+
+function processPathlossFile(buffer) {
+  // Implementar el procesamiento del archivo PL5
+  alert('El formato .pl5 aún no está soportado. Por favor usa archivos CSV.');
+}
+
+// 2. Visualización avanzada del perfil (factor K editable)
+let factorK = 4/3;
+function setFactorK(nuevoK) {
+  factorK = parseFloat(nuevoK) || 4/3;
+  alert('Nuevo factor K aplicado: ' + factorK);
+}
+
+// 3. Parámetros de radioenlace (cálculo básico)
+function abrirPanelParametrosRadio() {
+  document.getElementById('modal-parametros-radio').style.display = 'flex';
+}
+function cerrarPanelParametrosRadio() {
+  document.getElementById('modal-parametros-radio').style.display = 'none';
+}
+function calcularParametrosRadio() {
+  const pt = parseFloat(document.getElementById('potenciaTX').value);
+  const ga = parseFloat(document.getElementById('gananciaA').value);
+  const gb = parseFloat(document.getElementById('gananciaB').value);
+  const l = parseFloat(document.getElementById('perdidas').value);
+  const fade = parseFloat(document.getElementById('fadeMargin').value);
+  const distancia = parseFloat(document.getElementById('distanciaRadio').value);
+  const frecuencia = parseFloat(document.getElementById('frecuenciaRadio').value);
+  if (isNaN(pt) || isNaN(ga) || isNaN(gb) || isNaN(l) || isNaN(fade) || isNaN(distancia) || isNaN(frecuencia)) {
+    document.getElementById('resultado-parametros-radio').innerHTML = '<span style="color:#ef4444;">Datos incompletos</span>';
+    return;
+  }
+  // Pérdida espacio libre (dB)
+  const Lfs = 92.45 + 20 * Math.log10(distancia) + 20 * Math.log10(frecuencia);
+  const pr = pt + ga + gb - Lfs - l;
+  document.getElementById('resultado-parametros-radio').innerHTML =
+    `<b>Pérdida espacio libre:</b> ${Lfs.toFixed(2)} dB<br>
+     <b>Potencia recibida:</b> ${pr.toFixed(2)} dBm<br>
+     <b>Margen de desvanecimiento:</b> ${fade} dB<br>
+     <b>Margen total:</b> ${(pr - fade).toFixed(2)} dBm`;
+}
+
+// 5. Gestión de equipos y antenas
+let equiposAntenas = [];
+function abrirPanelEquiposAntenas() {
+  document.getElementById('modal-equipos-antenas').style.display = 'flex';
+  mostrarListaEquiposAntenas();
+}
+function cerrarPanelEquiposAntenas() {
+  document.getElementById('modal-equipos-antenas').style.display = 'none';
+}
+function guardarEquipoAntena() {
+  const modeloRadio = document.getElementById('modeloRadio').value.trim();
+  const modeloAntena = document.getElementById('modeloAntena').value.trim();
+  const ganancia = parseFloat(document.getElementById('gananciaAntena').value);
+  if (!modeloRadio || !modeloAntena || isNaN(ganancia)) {
+    alert('Completa todos los campos.');
+    return;
+  }
+  equiposAntenas.push({ modeloRadio, modeloAntena, ganancia });
+  mostrarListaEquiposAntenas();
+}
+function mostrarListaEquiposAntenas() {
+  const div = document.getElementById('lista-equipos-antenas');
+  if (!equiposAntenas.length) {
+    div.innerHTML = '<i>No hay equipos registrados.</i>';
+    return;
+  }
+  div.innerHTML = '<ul>' + equiposAntenas.map(eq =>
+    `<li><b>${eq.modeloRadio}</b> - ${eq.modeloAntena} (${eq.ganancia} dBi)</li>`
+  ).join('') + '</ul>';
+}
+
+// 4. Visualización geográfica mejorada (ya tienes Leaflet, solo ejemplo de color y tooltip)
+function mostrarMapaEnlaces(estadoFiltro = null) {
+  // ...tu código existente...
+  // Puedes mejorar los tooltips y colores aquí para que se parezca más a Pathloss.
+}
+</script>
+</script>
+<div class="container">
+    <!-- VIDEO PROFESIONAL DEBAJO DEL LOGO -->
+   <div class="banner-hero">
+<video 
+  src="https://dl.dropboxusercontent.com/scl/fi/isjx084d625twlii2vmkd/Proyecto-video.mp4?rlkey=k2dwu1ek0lt5w77whlzq80zes&st=4h4wxyq1"
+  autoplay loop muted playsinline
+  poster="img/video-placeholder.jpg"
+  style="width:100%;height:auto;max-height:220px;object-fit:cover;border-radius:18px;box-shadow:0 4px 32px #00e6ff22;"
+></video>
+  <div class="banner-hero-overlay">
+    <div class="banner-hero-content">
+      <img src="img/logo_empresa.png" alt="Logo Fangio Telecom" class="banner-hero-logo" />
+      <div>
+        <h1 class="banner-hero-title">Fangio Telecom</h1>
+        <div class="banner-hero-subtitle">Base de datos de Enlaces PtP</div>
+        <a href="https://fangio.com.mx" target="_blank" class="banner-hero-link">
+          <i class="fas fa-globe"></i> fangio.com.mx
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="fangio-header-decoration"></div>
+  
+</div>
+    <div class="action-buttons">    
+</div>
+<div id="indicador-factibilidad" style="text-align:center; font-size:2rem; font-weight:800; margin-bottom:10px;">
+</div>
+<div id="perfil-elevacion-con-torres"
+     style="display: flex; align-items: flex-end; justify-content: center; margin: 30px auto 24px auto; width: 100%; max-width: 100vw; position: relative;">
+<div style="width:160px; min-width:120px; height:320px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; margin-right:48px; position:relative;">    <!-- Cuadro de datos arriba de la torre -->
+    <div id="torreA-info"
+         style="position:absolute; left:50%; top:-70px; transform:translateX(-50%); background:#181f2a; color:#00e6ff; border-radius:12px; box-shadow:0 2px 12px #00e6ff33; padding:10px 18px; min-width:120px; text-align:center; font-size:14px; z-index:2;">
+      <b id="torreA-id">ID</b><br>
+      <span id="torreA-nombre">Nombre</span><br>
+      <span id="torreA-altura">Altura m</span>
+    </div>
+<svg viewBox="0 0 48 180" style="height:320px; width:auto; display:block;" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="torreMetalB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#e53935" stop-opacity="0.85"/>
+    </linearGradient>
+    <pattern id="rejillaB" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="8" height="8" fill="none"/>
+      <line x1="0" y1="0" x2="8" y2="8" stroke="#e53935" stroke-width="0.7" opacity="0.18"/>
+      <line x1="8" y1="0" x2="0" y2="8" stroke="#e53935" stroke-width="0.7" opacity="0.18"/>
+    </pattern>
+  </defs>
+  <polygon points="24,10 6,170 42,170" fill="url(#torreMetalB)" stroke="#fff" stroke-width="6"/>
+  <polygon points="24,20 12,165 36,165" fill="url(#rejillaB)" opacity="0.5"/>
+  <line x1="24" y1="10" x2="24" y2="170" stroke="#e53935" stroke-width="4"/>
+  <line x1="12" y1="50" x2="36" y2="130" stroke="#e53935" stroke-width="2"/>
+  <line x1="36" y1="50" x2="12" y2="130" stroke="#e53935" stroke-width="2"/>
+  <line x1="10" y1="90" x2="38" y2="150" stroke="#e53935" stroke-width="2"/>
+  <line x1="38" y1="90" x2="10" y2="150" stroke="#e53935" stroke-width="2"/>
+  <line x1="12" y1="50" x2="36" y2="50" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="10" y1="90" x2="38" y2="90" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="12" y1="130" x2="36" y2="130" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="6" y1="170" x2="42" y2="170" stroke="#e53935" stroke-width="5"/>
+  <rect x="20" y="2" width="8" height="16" rx="2" fill="#fff" opacity="0.85"/>
+  <rect x="16" y="0" width="16" height="4" rx="2" fill="#e53935" opacity="0.9"/>
+  <ellipse cx="32" cy="60" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+  <ellipse cx="16" cy="100" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+  <ellipse cx="32" cy="140" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+</svg>
+  </div>
+  <div style="flex:1; min-width:0;">
+    <div id="perfilElevacionPlotly"
+         style="width:100%;height:400px;margin:0;background:#181f2a;border-radius:32px;"></div>
+  </div>
+<div style="width:160px; min-width:120px; height:320px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; margin-right:48px; position:relative;">    <!-- Cuadro de datos arriba de la torre -->
+    <div id="torreB-info"
+         style="position:absolute; left:50%; top:-70px; transform:translateX(-50%); background:#181f2a; color:#00e6ff; border-radius:12px; box-shadow:0 2px 12px #00e6ff33; padding:10px 18px; min-width:120px; text-align:center; font-size:14px; z-index:2;">
+      <b id="torreB-id">ID</b><br>
+      <span id="torreB-nombre">Nombre</span><br>
+      <span id="torreB-altura">Altura m</span>
+    </div>
+<svg viewBox="0 0 48 180" style="height:320px; width:auto; display:block;" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="torreMetalA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#e53935" stop-opacity="0.85"/>
+    </linearGradient>
+    <pattern id="rejillaA" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="8" height="8" fill="none"/>
+      <line x1="0" y1="0" x2="8" y2="8" stroke="#e53935" stroke-width="0.7" opacity="0.18"/>
+      <line x1="8" y1="0" x2="0" y2="8" stroke="#e53935" stroke-width="0.7" opacity="0.18"/>
+    </pattern>
+  </defs>
+  <polygon points="24,10 6,170 42,170" fill="url(#torreMetalA)" stroke="#fff" stroke-width="6"/>
+  <polygon points="24,20 12,165 36,165" fill="url(#rejillaA)" opacity="0.5"/>
+  <line x1="24" y1="10" x2="24" y2="170" stroke="#e53935" stroke-width="4"/>
+  <line x1="12" y1="50" x2="36" y2="130" stroke="#e53935" stroke-width="2"/>
+  <line x1="36" y1="50" x2="12" y2="130" stroke="#e53935" stroke-width="2"/>
+  <line x1="10" y1="90" x2="38" y2="150" stroke="#e53935" stroke-width="2"/>
+  <line x1="38" y1="90" x2="10" y2="150" stroke="#e53935" stroke-width="2"/>
+  <line x1="12" y1="50" x2="36" y2="50" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="10" y1="90" x2="38" y2="90" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="12" y1="130" x2="36" y2="130" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="6" y1="170" x2="42" y2="170" stroke="#e53935" stroke-width="5"/>
+  <rect x="20" y="2" width="8" height="16" rx="2" fill="#fff" opacity="0.85"/>
+  <rect x="16" y="0" width="16" height="4" rx="2" fill="#e53935" opacity="0.9"/>
+  <ellipse cx="32" cy="60" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+  <ellipse cx="16" cy="100" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+  <ellipse cx="32" cy="140" rx="3" ry="7" fill="#e53935" opacity="0.7"/>
+</svg>
+  </div>
+</div>
+<div style="display: flex; gap: 18px; justify-content: center; margin: 24px 0 0 0;">
+   <button class="tab-button active" onclick="mostrarPestana('formulario', event)">
+    <i class="fas fa-edit"></i> Formulario de Enlaces
+  </button>
+   <button class="tab-button" onclick="mostrarPestana('enlaces', event)">
+    <i class="fas fa-list"></i> Mis Enlaces (<span id="contador-enlaces">0</span>)
+  </button>
+  <button class="tab-button" onclick="mostrarPestana('mismoTransporte', event)">
+    <i class="fas fa-exchange-alt"></i> Mismo Transporte
+  </button>
+  <button class="tab-button" onclick="mostrarPestana('resumen', event)">
+    <i class="fas fa-chart-pie"></i> Resumen
+  </button>
+</div>
+</div>
+    <div class="main-content">
+      <div class="tabs-container">
+        <div class="tabs">
+</div>
+      </div>
+      <div id="tab-formulario" class="tab-content active">
+        <div class="frecuencia-info">
+          <strong><i class="fas fa-info-circle"></i> Reglas de Frecuencia:</strong><br>
+          • De 0-5 km se usa una frecuencia de 80 GHz<br>
+          • De 5-15 km se usa una frecuencia 15 GHz<br>
+          • De 15 +1 km se usa una frecuencia de 8 GHz
+        </div>
+        <div class="file-upload-row">
+  <div class="file-upload">
+    <label for="inputFile">
+      <i class="fas fa-upload"></i> Cargar archivo Excel
+    </label>
+    <input type="file" id="inputFile" accept=".xlsx" />
+    <div id="archivo-cargado" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h4 style="color: #28a745; margin-bottom: 5px;">
+            <i class="fas fa-file-excel"></i> Archivo Cargado
+          </h4>
+          <p id="nombre-archivo" style="font-weight: bold; margin-bottom: 3px;"></p>
+          <small id="info-archivo" style="color: #666;"></small>
+        </div>
+        <button id="borrar-archivo" type="button" class="btn btn-danger btn-sm">
+          <i class="fas fa-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+    <div class="loading" id="loading" style="display:none;">
+      <div class="spinner" style="border-top:4px solid #764ba2; border-right:4px solid #667eea; border-bottom:4px solid #10b981; border-left:4px solid #fff;"></div>
+      <p style="color:#764ba2; font-weight:600;">Cargando archivo...</p>
+    </div>
+  </div>
+  <div class="file-upload">
+    <label for="inputFilePairs">
+      <i class="fas fa-upload"></i> Cargar Excel de Pares
+    </label>
+    <input type="file" id="inputFilePairs" accept=".xlsx" />
+    <div id="archivo-pares-cargado" style="display: none;">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <h4 style="color: #28a745; margin-bottom: 5px;">
+        <i class="fas fa-file-excel"></i> Archivo de Pares Cargado
+      </h4>
+      <p id="nombre-archivo-pares" style="font-weight: bold; margin-bottom: 3px;"></p>
+      <small id="info-archivo-pares" style="color: #666;"></small>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-primary" onclick="procesarPares()">
+        <i class="fas fa-play"></i> Procesar Pares
+      </button>
+      <button id="borrar-archivo-pares" type="button" class="btn btn-danger btn-sm">
+        <i class="fas fa-trash"></i> Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+        <div class="form-grid">
+          <div><label for="idA"><i class="fas fa-id-card"></i> ID A</label><input type="text" id="idA" /></div>
+          <div><label for="idB"><i class="fas fa-id-card"></i> ID B</label><input type="text" id="idB" /></div>
+          <div><label for="nombreA"><i class="fas fa-building"></i> Nombre Sitio A</label><input type="text" id="nombreA" /></div>
+          <div><label for="nombreB"><i class="fas fa-building"></i> Nombre Sitio B</label><input type="text" id="nombreB" /></div>
+          <div><label for="latA"><i class="fas fa-map-marker-alt"></i> Latitud A</label><input type="text" id="latA" /></div>
+          <div><label for="lonA"><i class="fas fa-map-marker-alt"></i> Longitud A</label><input type="text" id="lonA" /></div>
+          <div><label for="latB"><i class="fas fa-map-marker-alt"></i> Latitud B</label><input type="text" id="latB" /></div>
+          <div><label for="lonB"><i class="fas fa-map-marker-alt"></i> Longitud B</label><input type="text" id="lonB" /></div>
+          <div><label for="latArad"><i class="fas fa-calculator"></i> Latitud A (rad)</label><input type="text" id="latArad" readonly /></div>
+          <div><label for="lonArad"><i class="fas fa-calculator"></i> Longitud A (rad)</label><input type="text" id="lonArad" readonly /></div>
+          <div><label for="latBrad"><i class="fas fa-calculator"></i> Latitud B (rad)</label><input type="text" id="latBrad" readonly /></div>
+          <div><label for="lonBrad"><i class="fas fa-calculator"></i> Longitud B (rad)</label><input type="text" id="lonBrad" readonly /></div>
+          <div><label for="distancia"><i class="fas fa-ruler"></i> Distancia (km)</label><input type="text" id="distancia" readonly /></div>
+          <div><label for="frecuencia"><i class="fas fa-signal"></i> Frecuencia (GHz)</label><input type="text" id="frecuencia" readonly style="background-color: #ffffcc;" /></div>
+          <div><label for="alturaA"><i class="fas fa-arrows-alt-v"></i> Altura Torre A</label><input type="text" id="alturaA" /></div>
+          <div><label for="alturaB"><i class="fas fa-arrows-alt-v"></i> Altura Torre B</label><input type="text" id="alturaB" /></div>
+          <div><label for="ranA"><i class="fas fa-wifi"></i> Altura RAN A</label><input type="text" id="ranA" /></div>
+          <div><label for="ranB"><i class="fas fa-wifi"></i> Altura RAN B</label><input type="text" id="ranB" /></div>
+          <div><label for="TransA"><i class="fas fa-truck"></i> Tipo de transporte sitio A</label><input type="text" id="TransA" /></div>
+          <div><label for="TransB"><i class="fas fa-truck"></i> Tipo de transporte sitio B</label><input type="text" id="TransB" /></div>
+          <div><label for="ArreA"><i class="fas fa-handshake"></i> Tipo de Arrendamiento A</label><input type="text" id="ArreA" /></div>
+          <div><label for="ArreB"><i class="fas fa-handshake"></i> Tipo de Arrendamiento B</label><input type="text" id="ArreB" /></div>
+          <div><label for="OnA"><i class="fas fa-power-off"></i> On Air A</label><input type="text" id="OnA" /></div>
+          <div><label for="OnB"><i class="fas fa-power-off"></i> On Air B</label><input type="text" id="OnB" /></div>
+          <div><label for="TorreA"><i class="fas fa-broadcast-tower"></i> Tipo de Torre A</label><input type="text" id="TorreA" /></div>
+          <div><label for="TorreB"><i class="fas fa-broadcast-tower"></i> Tipo de Torre B</label><input type="text" id="TorreB" /></div>
+          <div><label for="TorreA"><i class="fas fa-broadcast-tower"></i> Estado A</label><input type="text" id="EstadoA" /></div>
+          <div><label for="TorreA"><i class="fas fa-broadcast-tower"></i> Estado B</label><input type="text" id="EstadoB" /></div>
+          <div><label for="bulboCurvatura"><i class="fas fa-globe"></i> Bulbo Curvatura Terrestre (m)</label><input type="text" id="bulboCurvatura" readonly /></div>
+          <div><label for="radioFresnel"><i class="fas fa-circle"></i> Radio máx. zona de Fresnel (m)</label><input type="text" id="radioFresnel" readonly /></div>
+          <div><label for="alturaLibre"><i class="fas fa-arrows-alt-v"></i> Altura libre necesaria (m)</label><input type="text" id="alturaLibre" readonly /></div>
+          <div><label for="alturaDisponible"><i class="fas fa-arrows-alt-v"></i> Altura real disponible (m)</label><input type="text" id="alturaDisponible" readonly /></div>
+          <div><label for="factibilidadCurvatura"><i class="fas fa-check-circle"></i> Factibilidad Curvatura/Fresnel</label><input type="text" id="factibilidadCurvatura" readonly /></div>
+          <div>
+          <label for="disponibilidadAnual"><i class="fas fa-percentage"></i> Disponibilidad Anual (%)</label>
+            <input type="text" id="disponibilidadAnual" readonly />
+           </div>
+        </div>
+        <div class="action-buttons">
+          <button id="agregarBtn" class="btn btn-success" onclick="agregarOActualizarEnlace()">
+            <i class="fas fa-check"></i> Agregar Enlace
+          </button>
+          <button class="btn btn-secondary" onclick="limpiarFormulario()">
+            <i class="fas fa-trash"></i> Limpiar Formulario
+          </button>
+          <button class="btn btn-primary" onclick="mostrarPestana('enlaces')">
+            <i class="fas fa-list"></i> Ver Mis Enlaces
+          </button>
+          <button class="btn btn-warning" onclick="exportarFactiblesParaPathloss()">
+            <i class="fas fa-file-export"></i> Exportar Factibles para Pathloss
+          </button>
+        </div>
+        <div class="action-buttons">
+  <button class="btn btn-info" onclick="abrirPanelParametrosRadio()">
+    <i class="fas fa-cogs"></i> Parámetros Radioenlace
+  </button>
+  <button class="btn btn-primary" onclick="abrirPanelEquiposAntenas()">
+    <i class="fas fa-broadcast-tower"></i> Gestión Equipos/Antenas
+  </button>
+  <button id="toggleMismoTransporte" class="btn btn-outline-info" type="button" onclick="togglePermitirMismoTransporte()">
+    <i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte
+  </button>
+</div>
+      </div>
+      <div id="tab-seleccion" class="tab-content">
+  <div class="enlaces-counter">
+    <i class="fas fa-check-square"></i> Enlaces Seleccionados: <span id="enlaces-seleccionados">0</span>
+  </div>
+  <div class="action-buttons">
+    <button class="btn btn-primary" onclick="seleccionarTodo()">
+      <i class="fas fa-check-double"></i> Seleccionar Todo
+    </button>
+    <button class="btn btn-secondary" onclick="deseleccionarTodo()">
+      <i class="fas fa-times"></i> Deseleccionar Todo
+    </button>
+    <button id="eliminarSeleccionadosBtn" class="btn btn-danger" onclick="eliminarSeleccionados()" disabled>
+      <i class="fas fa-trash-alt"></i> Eliminar Seleccionados
+    </button>
+
+  </div>
+
+  <div class="table-container seleccion-container">
+  </div>
+</div>
+      <div id="tab-enlaces" class="tab-content">
+        <div class="enlaces-counter">
+          <i class="fas fa-chart-line"></i> Total de Enlaces Registrados: <span id="total-enlaces">0</span>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="mostrarPestana('formulario')">
+            <i class="fas fa-plus"></i> Agregar Nuevo Enlace
+          </button>
+          <button class="btn btn-success" onclick="exportarExcel()">
+            <i class="fas fa-file-excel"></i> Exportar a Excel
+          </button>
+        </div>
+        <button class="btn btn-secondary" onclick="seleccionarTodosEnlaces()">
+            <i class="fas fa-check-double"></i> Seleccionar Todos
+        </button>
+        <button class="btn btn-danger" onclick="eliminarEnlacesSeleccionados()" id="btnEliminarSeleccionados" disabled>
+            <i class="fas fa-trash"></i> Eliminar Seleccionados
+        </button>
+        <button id="btnPerfilElevacionGlobal" class="btn btn-info" style="display:none; margin-left:8px;">
+        <i class="fas fa-mountain"></i> Perfil Elevación
+        </button>
+        <div class="table-container">
+
+<table id="tabla">
+  <thead>
+  <tr>
+    <th><input type="checkbox" id="checkTodos" onclick="toggleSeleccionarTodos(this)"></th>
+    <th class="th-a" title="Identificador único del sitio A"><i class="fas fa-map-marker-alt"></i><br>ID A</th>
+    <th class="th-a" title="Nombre del sitio A"><i class="fas fa-building"></i><br>Nombre A</th>
+    <th class="th-a" title="Latitud del sitio A"><i class="fas fa-compass"></i><br>Lat A</th>
+    <th class="th-a" title="Longitud del sitio A"><i class="fas fa-globe"></i><br>Lon A</th>
+    <th class="th-a" title="Latitud en radianes del sitio A"><i class="fas fa-calculator"></i><br>Lat A (rad)</th>
+    <th class="th-a" title="Longitud en radianes del sitio A"><i class="fas fa-calculator"></i><br>Lon A (rad)</th>
+    <th class="th-b" title="Identificador único del sitio B"><i class="fas fa-map-marker-alt"></i><br>ID B</th>
+    <th class="th-b" title="Nombre del sitio B"><i class="fas fa-building"></i><br>Nombre B</th>
+    <th class="th-b" title="Latitud del sitio B"><i class="fas fa-compass"></i><br>Lat B</th>
+    <th class="th-b" title="Longitud del sitio B"><i class="fas fa-globe"></i><br>Lon B</th>
+    <th class="th-b" title="Latitud en radianes del sitio B"><i class="fas fa-calculator"></i><br>Lat B (rad)</th>
+    <th class="th-b" title="Longitud en radianes del sitio B"><i class="fas fa-calculator"></i><br>Lon B (rad)</th>
+    <th class="th-calc" title="Distancia calculada entre sitios (km)"><i class="fas fa-route"></i><br>Distancia (km)</th>
+    <th class="th-calc" title="Frecuencia recomendada según distancia"><i class="fas fa-broadcast-tower"></i><br>Frecuencia (GHz)</th>
+    <th class="th-calc" title="Disponibilidad anual (%)"><i class="fas fa-percentage"></i><br>Disponibilidad</th>
+    <th class="th-tech" title="Altura de la torre A"><i class="fas fa-arrows-alt-v"></i><br>Altura Torre A</th>
+    <th class="th-tech" title="Altura de la torre B"><i class="fas fa-arrows-alt-v"></i><br>Altura Torre B</th>
+    <th class="th-tech" title="Altura RAN A"><i class="fas fa-wifi"></i><br>Altura RAN A</th>
+    <th class="th-tech" title="Altura RAN B"><i class="fas fa-wifi"></i><br>Altura RAN B</th>
+    <th class="th-trans" title="Tipo de transporte sitio A"><i class="fas fa-truck"></i><br>Transporte A</th>
+    <th class="th-trans" title="Tipo de transporte sitio B"><i class="fas fa-truck"></i><br>Transporte B</th>
+    <th class="th-arr" title="Tipo de arrendamiento A"><i class="fas fa-handshake"></i><br>Arrendamiento A</th>
+    <th class="th-arr" title="Tipo de arrendamiento B"><i class="fas fa-handshake"></i><br>Arrendamiento B</th>
+    <th class="th-onair" title="Estado operativo A"><i class="fas fa-power-off"></i><br>On Air A</th>
+    <th class="th-onair" title="Estado operativo B"><i class="fas fa-power-off"></i><br>On Air B</th>
+    <th class="th-tower" title="Tipo de torre A"><i class="fas fa-tower-broadcast"></i><br>Tipo Torre A</th>
+    <th class="th-tower" title="Tipo de torre B"><i class="fas fa-tower-broadcast"></i><br>Tipo Torre B</th>
+    <th class="th-state" title="Estado A"><i class="fas fa-flag"></i><br>Estado A</th>
+    <th class="th-state" title="Estado B"><i class="fas fa-flag"></i><br>Estado B</th>
+    <th class="th-fact" title="¿Enlace factible?" style="font-weight: bold; text-align: center;"><i class="fas fa-check-circle"></i><br>Factible</th>
+    <th class="th-fact" title="Antenas requeridas" style="font-weight: bold;"><i class="fas fa-satellite-dish"></i><br>Antenas</th>
+    <th class="th-fact" title="Tipo de enlace" style="font-weight: bold;"><i class="fas fa-network-wired"></i><br>Tipo Enlace</th>
+    <th class="th-fact" title="Análisis detallado" style="font-weight: bold;"><i class="fas fa-info-circle"></i><br>Análisis</th>
+  </tr>
+</thead>
+  <tbody></tbody>
+</table>
+        </div>
+        <div id="mensaje-sin-enlaces" class="mensaje-sin-enlaces" style="display: none;">
+          <i class="fas fa-broadcast-tower"></i>
+          <h3>No hay enlaces registrados</h3>
+          <p>Usa el formulario para agregar tu primer enlace PtP</p>
+          <button class="btn btn-primary" onclick="mostrarPestana('formulario')">
+            <i class="fas fa-plus"></i> Agregar Primer Enlace
+          </button>
+        </div>
+      </div>
+      <div id="tab-mismoTransporte" class="tab-content">
+  <div style="margin: 24px 0;">
+    <h2>Análisis de Enlaces con Mismo Tipo de Transporte Permitido</h2>
+    <div class="table-container" id="tabla-mismo-transporte"></div>
+  </div>
+</div>
+     <div id="tab-resumen" class="tab-content">
+  <div class="table-container" style="max-width:600px;margin:auto;">
+    <div class="resumen-enlaces" style="display: flex; flex-wrap:wrap; gap: 24px; align-items: center; margin-bottom: 18px; justify-content:center;">
+      <div>
+        <strong>Total de Enlaces:</strong> <span id="resumen-total-enlaces">0</span>
+      </div>
+      <div>
+        <strong>Factibles:</strong> <span id="resumen-enlaces-factibles" style="color:#10b981;">0</span>
+      </div>
+      <button class="btn btn-success" onclick="exportarFactiblesParaPathloss()">
+        <i class="fas fa-file-export"></i> Exportar Factibles
+      </button>
+        <button class="btn btn-danger" id="btnDescargarFaltantes" style="margin-left:8px; display:none;">
+  <i class="fas fa-download"></i> Descargar Pares Faltantes
+</button>
+      <button class="btn btn-primary" onclick="exportarExcel()">
+        <i class="fas fa-file-excel"></i> Exportar Todos
+      </button>
+      <button class="btn btn-info" onclick="mostrarGraficoResumen()">
+        <i class="fas fa-chart-bar"></i> Ver Gráfico Resumen
+      </button>
+    </div>
+    <div style="margin-top:30px; text-align:center; color:#888;">
+      <i class="fas fa-info-circle"></i> Aquí puedes ver el resumen y exportar tus enlaces.
+    </div>
+  </div>
+  <div id="mapa-enlaces" style="width:100%;max-width:900px;height:480px;margin:32px auto 0 auto;border-radius:18px;box-shadow:0 2px 18px #00bcd455;">
+  </div>
+</div>
+<div id="panel-detalle-enlace">
+  <button onclick="document.getElementById('panel-detalle-enlace').style.display='none'" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;"><i class="fas fa-times"></i></button>
+  <div id="detalle-enlace-contenido"></div>
+</div>
+<div id="segmentacion-estados" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:24px 0 0 0;">
+</div>
+    </div>
+  </div>
+<script>
+  let dataExcel = [];
+  let filaEditando = null;
+  let dataPares = [];
+function guardarArchivoExcelEnIndexedDB(nombre, arrayBuffer, info) {
+  const request = indexedDB.open('ArchivosExcelDB', 2); 
+  request.onupgradeneeded = function(event) {
+    const db = event.target.result;
+    if (!db.objectStoreNames.contains('archivos')) {
+      db.createObjectStore('archivos', { keyPath: 'nombre' });
+    }
+  };
+  request.onsuccess = function(event) {
+    const db = event.target.result;
+    const tx = db.transaction('archivos', 'readwrite');
+    const store = tx.objectStore('archivos');
+    store.put({ nombre, arrayBuffer, info });
+    tx.oncomplete = () => db.close();
+  };
+}
+function cargarArchivoExcelDeIndexedDB(nombre, callback) {
+  const request = indexedDB.open('ArchivosExcelDB', 2);
+  request.onsuccess = function(event) {
+    const db = event.target.result;
+    const tx = db.transaction('archivos', 'readonly');
+    const store = tx.objectStore('archivos');
+    const getReq = store.get(nombre);
+    getReq.onsuccess = function() {
+      callback(getReq.result ? getReq.result.arrayBuffer : null, getReq.result ? getReq.result.info : null);
+      db.close();
+    };
+  };
+}
+function cargarArchivoDeStorage() {
+  const archivoInfo = localStorage.getItem('archivoExcelInfo');
+  if (archivoInfo) {
+    try {
+      const info = JSON.parse(archivoInfo);
+      cargarArchivoExcelDeIndexedDB(info.nombre, function(arrayBuffer, infoGuardada) {
+        if (arrayBuffer) {
+          const data = new Uint8Array(arrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          dataExcel = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          mostrarArchivoCargado(infoGuardada || info);
+        }
+      });
+    } catch (error) {
+      console.error('Error al cargar archivo desde storage:', error);
+    }
+  }
+}
+function guardarArchivoParesEnIndexedDB(nombre, arrayBuffer, info) {
+  const request = indexedDB.open('ArchivosExcelDB', 2); 
+  request.onupgradeneeded = function(event) {
+    const db = event.target.result;
+    if (!db.objectStoreNames.contains('pares')) {
+      db.createObjectStore('pares', { keyPath: 'nombre' });
+    }
+  };
+  request.onsuccess = function(event) {
+    const db = event.target.result;
+    const tx = db.transaction('pares', 'readwrite');
+    const store = tx.objectStore('pares');
+    store.put({ nombre, arrayBuffer, info });
+    tx.oncomplete = () => db.close();
+  };
+}
+function cargarArchivoParesDeIndexedDB(nombre, callback) {
+  const request = indexedDB.open('ArchivosExcelDB', 2); 
+  request.onsuccess = function(event) {
+    const db = event.target.result;
+    const tx = db.transaction('pares', 'readonly');
+    const store = tx.objectStore('pares');
+    const getReq = store.get(nombre);
+    getReq.onsuccess = function() {
+      callback(getReq.result ? getReq.result.arrayBuffer : null, getReq.result ? getReq.result.info : null);
+      db.close();
+    };
+  };
+}
+function cargarArchivoParesDeStorage() {
+  const archivoInfo = localStorage.getItem('archivoParesInfo');
+  if (archivoInfo) {
+    try {
+      const info = JSON.parse(archivoInfo);
+      cargarArchivoParesDeIndexedDB(info.nombre, function(arrayBuffer, infoGuardada) {
+        if (arrayBuffer) {
+          const data = new Uint8Array(arrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          dataPares = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          const contenedor = document.getElementById('archivo-pares-cargado');
+          const nombreArchivo = document.getElementById('nombre-archivo-pares');
+          const infoArchivo = document.getElementById('info-archivo-pares');
+          if (contenedor && nombreArchivo && infoArchivo) {
+            nombreArchivo.textContent = infoGuardada.nombre;
+            infoArchivo.textContent = `${infoGuardada.filas} filas • ${(infoGuardada.tamaño / 1024).toFixed(1)} KB • Cargado: ${new Date(infoGuardada.fechaCarga).toLocaleString()}`;
+            contenedor.style.display = 'block';
+            document.getElementById('inputFilePairs').style.display = 'none';
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error al cargar archivo de pares desde storage:', error);
+    }
+  }
+} 
+function guardarEnlacesEnStorage() {
+  const tabla = document.querySelector('#tabla tbody');
+const filas = tabla.querySelectorAll('tr');
+const enlaces = [];
+filas.forEach(fila => {
+  const celdas = fila.querySelectorAll('td');
+  const enlace = [];
+for (let i = 1; i < celdas.length; i++) {
+  if (i === 33 && celdas[i].querySelector('button') && celdas[i].dataset.analisis) {
+    enlace.push(celdas[i].dataset.analisis);
+  } else {
+    enlace.push(celdas[i].textContent);
+  }
+}
+  enlaces.push(enlace);
+});
+localStorage.setItem('enlacesPtP', JSON.stringify(enlaces));
+  console.log('Enlaces guardados:', enlaces.length);
+}
+function cargarEnlacesDeStorage() {
+  const enlacesGuardados = localStorage.getItem('enlacesPtP');
+  if (!enlacesGuardados) return;
+  const enlaces = JSON.parse(enlacesGuardados);
+  const tbody = document.querySelector('#tabla tbody');
+  tbody.innerHTML = '';
+
+  enlaces.forEach(enlaceData => {
+    const fila = document.createElement('tr');
+    const tdCheck = document.createElement('td');
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.className = 'check-enlace';
+    check.onclick = function(e) {
+      e.stopPropagation();
+      actualizarBotonEliminarSeleccionados();
+    };
+    tdCheck.appendChild(check);
+    fila.appendChild(tdCheck);
+
+    enlaceData.forEach((val, i) => {
+      const td = document.createElement('td');
+      if (i === 33) {
+        // Botón Ver Análisis
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-info btn-sm';
+        btn.innerHTML = '<i class="fas fa-info-circle"></i> Ver Análisis';
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          try {
+            const analisis = JSON.parse(val);
+            mostrarAnalisisDetallado(analisis);
+          } catch {
+            alert('No hay análisis detallado disponible.');
+          }
+        };
+        td.appendChild(btn);
+        td.dataset.analisis = val;
+      } else {
+        td.textContent = val;
+      }
+      fila.appendChild(td);
+    });
+
+    tbody.appendChild(fila); // <-- Esta línea es clave
+  });
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+}
+document.querySelector('#tabla tbody').addEventListener('click', function(e) {
+  let fila = e.target.closest('tr');
+  if (!fila) return;
+  document.querySelectorAll('#tabla tbody tr').forEach(f => f.classList.remove('selected'));
+  fila.classList.add('selected');
+  actualizarBotonPerfilElevacionGlobal();
+});
+document.getElementById('btnPerfilElevacionGlobal').onclick = function() {
+  const fila = document.querySelector('#tabla tbody tr.selected');
+  if (!fila) return;
+  const celdas = fila.querySelectorAll('td');
+const datos = {
+  idA: celdas[1]?.textContent,
+  nombreA: celdas[2]?.textContent,
+  latA: celdas[3]?.textContent,
+  lonA: celdas[4]?.textContent,
+  idB: celdas[7]?.textContent,
+  nombreB: celdas[8]?.textContent,
+  latB: celdas[9]?.textContent,
+  lonB: celdas[10]?.textContent,
+  alturaA: celdas[16]?.textContent, 
+  alturaB: celdas[17]?.textContent, 
+  frecuencia: celdas[13]?.textContent
+};
+  mostrarPerfilElevacionDesdeDatos(datos);
+  const perfilDiv = document.getElementById('perfil-elevacion-con-torres');
+  if (perfilDiv) {
+    perfilDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+};
+// ==================== GESTIÓN DE ARCHIVOS ====================
+function mostrarArchivoCargado(archivoInfo) {
+  const contenedor = document.getElementById('archivo-cargado');
+  const nombreArchivo = document.getElementById('nombre-archivo');
+  const infoArchivo = document.getElementById('info-archivo');
+  if (contenedor && nombreArchivo && infoArchivo) {
+    nombreArchivo.textContent = archivoInfo.nombre;
+    infoArchivo.textContent = `${archivoInfo.filas} filas • ${(archivoInfo.tamaño / 1024).toFixed(1)} KB • Cargado: ${new Date(archivoInfo.fechaCarga).toLocaleString()}`;
+    contenedor.style.display = 'block';
+    document.getElementById('inputFile').style.display = 'none';
+  }
+}
+function borrarArchivo() {
+  if (confirm('¿Estás seguro de que quieres borrar el archivo cargado? Esto eliminará todos los datos del Excel.')) {
+    dataExcel = [];
+    localStorage.removeItem('archivoExcelInfo');
+    const contenedor = document.getElementById('archivo-cargado');
+    const inputFile = document.getElementById('inputFile');
+    if (contenedor) contenedor.style.display = 'none';
+    if (inputFile) {
+      inputFile.style.display = 'block';
+      inputFile.value = '';
+    } 
+    alert('✅ Archivo eliminado correctamente');
+  }
+}
+function borrarArchivoPares() {
+  if (confirm('¿Estás seguro de que quieres borrar el archivo de pares cargado? Esto eliminará todos los datos de pares.')) {
+    dataPares = [];
+    localStorage.removeItem('archivoParesInfo');
+    const request = indexedDB.open('ArchivosExcelDB', 2);
+    request.onsuccess = function(event) {
+      const db = event.target.result;
+      if (db.objectStoreNames.contains('pares')) {
+        const tx = db.transaction('pares', 'readwrite');
+        const store = tx.objectStore('pares');
+        const archivoInfo = JSON.parse(localStorage.getItem('archivoParesInfo') || '{}');
+        if (archivoInfo.nombre) store.delete(archivoInfo.nombre);
+        tx.oncomplete = () => db.close();
+      }
+    };
+    const contenedor = document.getElementById('archivo-pares-cargado');
+    const inputFile = document.getElementById('inputFilePairs');
+    if (contenedor) contenedor.style.display = 'none';
+    if (inputFile) {
+      inputFile.style.display = 'block';
+      inputFile.value = '';
+    }
+    alert('✅ Archivo de pares eliminado correctamente');
+  }
+}
+  document.getElementById('borrar-archivo').addEventListener('click', borrarArchivo);
+  document.getElementById('idA').addEventListener('blur', () => autoCompletar('A'));
+  document.getElementById('idB').addEventListener('blur', () => autoCompletar('B'));
+  document.getElementById('latA').addEventListener('input', actualizarCalculos);
+  document.getElementById('lonA').addEventListener('input', actualizarCalculos);
+  document.getElementById('latB').addEventListener('input', actualizarCalculos);
+  document.getElementById('lonB').addEventListener('input', actualizarCalculos);
+  function actualizarContadorEnlaces() {
+    const totalEnlaces = document.querySelectorAll('#tabla tbody tr').length;
+    document.getElementById('contador-enlaces').textContent = totalEnlaces;
+    document.getElementById('total-enlaces').textContent = totalEnlaces;
+  }
+ function verificarEnlacesVacios() {
+    const totalEnlaces = document.querySelectorAll('#tabla tbody tr').length;
+    const tabla = document.querySelector('.table-container');
+    const mensaje = document.getElementById('mensaje-sin-enlaces');
+    if (totalEnlaces === 0) {
+      tabla.style.display = 'none';
+      mensaje.style.display = 'block';
+    } else {
+      tabla.style.display = 'block';
+      mensaje.style.display = 'none';
+    }
+  }
+ function autoCompletar(letra) {
+  const id = document.getElementById('id' + letra).value.trim().toUpperCase();
+if (!id) return;
+const fila = dataExcel.find(row => row[0] && row[0].toString().trim().toUpperCase() === id);
+  if (fila) {
+    document.getElementById('nombre' + letra).value = fila[3] || '';
+    document.getElementById('lat' + letra).value = fila[11] || '';
+    document.getElementById('lon' + letra).value = fila[12] || '';
+    document.getElementById('altura' + letra).value = fila[51] || '';
+    document.getElementById('ran' + letra).value = fila[52] || '';
+    document.getElementById('Trans' + letra).value = fila[103] || '';
+    document.getElementById('Arre' + letra).value = fila[4] || '';
+    document.getElementById('On' + letra).value = fila[102] || '';
+    document.getElementById('Torre' + letra).value = fila[21] || '';
+    document.getElementById('Estado' + letra).value = fila[13] || '';
+    actualizarCalculos();
+  } else {
+    document.getElementById('nombre' + letra).value = '';
+    document.getElementById('lat' + letra).value = '';
+    document.getElementById('lon' + letra).value = '';
+    document.getElementById('altura' + letra).value = '';
+    document.getElementById('ran' + letra).value = '';
+    document.getElementById('Trans' + letra).value = '';
+    document.getElementById('Arre' + letra).value = '';
+    document.getElementById('On' + letra).value = '';
+    document.getElementById('Torre' + letra).value = '';
+    document.getElementById('Estado' + letra).value = '';
+    actualizarCalculos();
+  }
+}
+  function actualizarCalculos() {
+    actualizarRadianes();
+    calcularDistanciaYFrecuencia();
+    calcularCurvaturaFresnel();
+  }
+  function actualizarRadianes() {
+    const rad = x => x * Math.PI / 180;
+    const latA = parseFloat(document.getElementById('latA').value);
+    const lonA = parseFloat(document.getElementById('lonA').value);
+    const latB = parseFloat(document.getElementById('latB').value);
+    const lonB = parseFloat(document.getElementById('lonB').value);
+    document.getElementById('latArad').value = isNaN(latA) ? '' : rad(latA).toFixed(6);
+    document.getElementById('lonArad').value = isNaN(lonA) ? '' : rad(lonA).toFixed(6);
+    document.getElementById('latBrad').value = isNaN(latB) ? '' : rad(latB).toFixed(6);
+    document.getElementById('lonBrad').value = isNaN(lonB) ? '' : rad(lonB).toFixed(6);
+  }
+  function calcularDistancia(lat1, lon1, lat2, lon2) {
+    if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return NaN;
+    const rad = x => x * Math.PI / 180;
+    const R = 6371.0088;
+    const φ1 = rad(lat1), φ2 = rad(lat2);
+    const Δφ = rad(lat2 - lat1);
+    const Δλ = rad(lon2 - lon1);
+    const a = Math.sin(Δφ / 2) ** 2 +
+              Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+  function desdeFormulario() {
+  return {
+    'Latitud A': document.getElementById('latA').value,
+    'Longitud A': document.getElementById('lonA').value,
+    'Latitud B': document.getElementById('latB').value,
+    'Longitud B': document.getElementById('lonB').value,
+    'Altura Torre A': document.getElementById('alturaA').value,
+    'Altura Torre B': document.getElementById('alturaB').value,
+    'Frecuencia': document.getElementById('frecuencia').value,
+    'idA': document.getElementById('idA').value,
+    'idB': document.getElementById('idB').value,
+    'nombreA': document.getElementById('nombreA').value,
+    'nombreB': document.getElementById('nombreB').value
+  };
+}
+  // ==================== VALIDACIONES DE FACTIBILIDAD ====================
+  function asignarFrecuencia(distanciaKm) {
+    if (isNaN(distanciaKm)) return ''; 
+    if (distanciaKm <= 5) {
+      return '80';
+    } else if (distanciaKm <= 15) {
+      return '15';
+    } else {
+      return '8';
+    }
+  }
+  function calcularDistanciaYFrecuencia() {
+    const latA = parseFloat(document.getElementById('latA').value);
+    const lonA = parseFloat(document.getElementById('lonA').value);
+    const latB = parseFloat(document.getElementById('latB').value);
+    const lonB = parseFloat(document.getElementById('lonB').value);
+    const distanciaKm = calcularDistancia(latA, lonA, latB, lonB);
+    if (!isNaN(distanciaKm)) {
+      document.getElementById('distancia').value = distanciaKm.toFixed(6);
+      document.getElementById('frecuencia').value = asignarFrecuencia(distanciaKm);
+    } else {
+      document.getElementById('distancia').value = '';
+      document.getElementById('frecuencia').value = '';
+    }
+    calcularDisponibilidadAnual();
+  }
+  function calcularDisponibilidadAnual() {
+  const distanciaKm = parseFloat(document.getElementById('distancia').value);
+  const frecuenciaGHz = parseFloat(document.getElementById('frecuencia').value);
+  if (isNaN(distanciaKm) || isNaN(frecuenciaGHz)) {
+    document.getElementById('disponibilidadAnual').value = '';
+    return;
+  }
+  let disponibilidad = 100 - (distanciaKm * 0.15) - (frecuenciaGHz * 0.5);
+  if (disponibilidad < 0) disponibilidad = 0;
+  if (disponibilidad > 100) disponibilidad = 100;
+  document.getElementById('disponibilidadAnual').value = disponibilidad.toFixed(2);
+}
+function calcularCurvaturaFresnel() {
+  const distanciaKm = parseFloat(document.getElementById('distancia').value);
+  const alturaTorreA = parseFloat(document.getElementById('alturaA').value);
+  const alturaTorreB = parseFloat(document.getElementById('alturaB').value);
+  const frecuenciaGHz = parseFloat(document.getElementById('frecuencia').value);
+  if (
+    isNaN(distanciaKm) ||
+    isNaN(alturaTorreA) ||
+    isNaN(alturaTorreB) ||
+    isNaN(frecuenciaGHz) ||
+    distanciaKm <= 0 ||
+    alturaTorreA <= 0 ||
+    alturaTorreB <= 0 ||
+    frecuenciaGHz <= 0
+  ) {
+    document.getElementById('bulboCurvatura').value = '';
+    document.getElementById('radioFresnel').value = '';
+    document.getElementById('alturaLibre').value = '';
+    document.getElementById('alturaDisponible').value = '';
+    document.getElementById('factibilidadCurvatura').value = 'NO DISPONIBLE';
+    return;
+  }
+  const R = 8495000; 
+  const d_m = distanciaKm * 1000;
+  const bulboCurvatura = (d_m * d_m) / (8 * R);
+  const D = distanciaKm;
+  const F1 = 17.32 * Math.sqrt(D / (4 * frecuenciaGHz));
+  const alturaLibre = bulboCurvatura + 0.6 * F1;
+  const alturaDisponible = Math.min(alturaTorreA, alturaTorreB);
+  let factibilidadCurvatura = '';
+  if (!isNaN(alturaDisponible) && !isNaN(alturaLibre)) {
+    factibilidadCurvatura = alturaDisponible >= alturaLibre ? 'FACTIBLE' : 'NO FACTIBLE';
+  } else {
+    factibilidadCurvatura = 'NO DISPONIBLE';
+  }
+  document.getElementById('bulboCurvatura').value = bulboCurvatura.toFixed(2);
+  document.getElementById('radioFresnel').value = F1.toFixed(2);
+  document.getElementById('alturaLibre').value = alturaLibre.toFixed(2);
+  document.getElementById('alturaDisponible').value = alturaDisponible.toFixed(2);
+  document.getElementById('factibilidadCurvatura').value = factibilidadCurvatura;
+}
+// ============================================
+//            ANÁLISIS DE FACTIBILIDAD 
+// ============================================
+function analizarFactibilidad(distanciaKm, arreA, arreB, transA, transB, torreA, torreB, OnA, OnB, esFactibleLOS = true) {
+  let factible = false;
+  let razon = '';
+  let diametroAntena = '';
+  let tipoEnlace = '';
+  let detallesValidacion = [];
+  if (!distanciaKm || isNaN(distanciaKm) || distanciaKm <= 0) {
+    return {
+      factible: false,
+      razon: 'No factible - Distancia inválida o cero',
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Error de Datos',
+      distancia: distanciaKm,
+      detalles: ['❌ Error en cálculo de distancia']
+    };
+  }
+  if (!distanciaKm || isNaN(distanciaKm) || distanciaKm <= 0) {
+    return {
+      factible: false,
+      razon: 'No factible - Distancia inválida o cero',
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Error de Datos',
+      distancia: distanciaKm,
+      detalles: ['❌ Error en cálculo de distancia']
+    };
+  }
+  const DISTANCIA_MAXIMA = 50;
+  if (distanciaKm > DISTANCIA_MAXIMA) {
+    return {
+      factible: false,
+      razon: `No factible - Distancia excesiva (${distanciaKm.toFixed(2)}km > ${DISTANCIA_MAXIMA}km)`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Fuera de Rango',
+      distancia: distanciaKm,
+      detalles: [`❌ Distancia ${distanciaKm.toFixed(2)}km supera el límite máximo de ${DISTANCIA_MAXIMA}km`]
+    };
+  }
+    if (!esFactibleLOS) {
+    return {
+      factible: false,
+      razon: 'No factible - Línea de vista obstruida (perfil de elevación)',
+      diametroAntena: 'N/A',
+      tipoEnlace: 'LOS Obstruida',
+      distancia: distanciaKm,
+      detalles: ['❌ Línea de vista obstruida según perfil de elevación']
+    };
+  }
+function analizarEnlaceSatelital() {
+  // Validar que haya datos básicos
+  if (!document.getElementById('latA').value || !document.getElementById('latB').value) {
+    alert('❌ Debes ingresar al menos las coordenadas de ambos sitios antes de realizar el análisis satelital');
+    return;
+  }
+
+  // Guardar los valores originales
+  const transAOriginal = document.getElementById('TransA').value;
+  const transBOriginal = document.getElementById('TransB').value;
+
+  try {
+    // Establecer configuración satelital
+    document.getElementById('TransA').value = 'Satelite-OA';
+    document.getElementById('TransB').value = 'Satelite-OA';
+    const mensaje = '🛰️ Analizando enlace en modo Satelital-Satelital...';
+    const indicador = document.createElement('div');
+    indicador.innerHTML = mensaje;
+    indicador.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#00bcd4; color:#fff; padding:8px 16px; border-radius:20px; z-index:1000;';
+    document.body.appendChild(indicador);
+    setTimeout(() => indicador.remove(), 3000);
+    agregarOActualizarEnlace();
+
+  } finally {
+    // Restaurar valores originales (incluso si hay error)
+    document.getElementById('TransA').value = transAOriginal;
+    document.getElementById('TransB').value = transBOriginal;
+  }
+}
+function validarEnlaceSatelital(distanciaKm) {
+  // Validaciones específicas para enlaces satelitales
+  if (distanciaKm > 100) {
+    return {
+      factible: false,
+      mensaje: 'Distancia excesiva para enlace satelital'
+    };
+  }
+  return {
+    factible: true,
+    mensaje: 'Distancia aceptable para enlace satelital'
+  };
+}
+
+function esSatelital(tipoTransporte) {
+  const t = (tipoTransporte || '').toLowerCase();
+  return t.includes('starlink') || 
+         t.includes('orbita') ||
+         t.includes('satelite-oa') ||
+         t.includes('satelital') ||
+         t.includes('satellite') ||
+         t.includes('sat-oa') ||
+         t.includes('satelite') ||
+         t.includes('satélite');
+}
+  const arreANorm = (arreA || '').toLowerCase().trim();
+  const arreBNorm = (arreB || '').toLowerCase().trim();
+  const transANorm = (transA || '').toLowerCase().trim();
+  const transBNorm = (transB || '').toLowerCase().trim();
+  const torreANorm = (torreA || '').toLowerCase().trim();
+  const torreBNorm = (torreB || '').toLowerCase().trim();
+  const onAirANorm = (OnA || '').toLowerCase().trim();
+  const onAirBNorm = (OnB || '').toLowerCase().trim();
+  function estaOnAir(estadoOnAir) {
+    return estadoOnAir.includes('on air') || 
+           estadoOnAir.includes('onair') ||
+           estadoOnAir.includes('operativo') ||
+           estadoOnAir.includes('activo') ||
+           estadoOnAir.includes('funcionando') ||
+           estadoOnAir === 'si' ||
+           estadoOnAir === 'sí' ||
+           estadoOnAir === 'yes';
+  }
+  function estaPendiente(estadoOnAir) {
+    return estadoOnAir.includes('pendiente') ||
+           estadoOnAir.includes('construcción') ||
+           estadoOnAir.includes('construccion') ||
+           estadoOnAir.includes('instalación') ||
+           estadoOnAir.includes('instalacion') ||
+           estadoOnAir.includes('desarrollo') ||
+           estadoOnAir.includes('proyecto') ||
+           estadoOnAir.includes('planeado') ||
+           estadoOnAir.includes('no operativo') ||
+           estadoOnAir.includes('inactivo') ||
+           estadoOnAir === 'no';
+  }
+  const onAirAActivo = estaOnAir(onAirANorm);
+  const onAirBActivo = estaOnAir(onAirBNorm);
+  const onAirAPendiente = estaPendiente(onAirANorm);
+  const onAirBPendiente = estaPendiente(onAirBNorm);
+if (onAirAPendiente) {
+  let motivoOnAir = `Torre A está pendiente: "${OnA}"`;
+  detallesValidacion.push(`❌ Torre A: "${OnA}" - Estado pendiente/inactivo`);
+  if (onAirBPendiente) {
+    detallesValidacion.push(`✅ Torre B: "${OnB}" - Estado pendiente/inactivo (no bloquea factibilidad)`);
+  } else {
+    detallesValidacion.push(`✅ Torre B: "${OnB}" - Estado operativo`);
+  }
+  detallesValidacion.push('⚠️ La torre A debe estar "On Air" (operativa) para establecer enlaces PtP');
+  return {
+    factible: false,
+    razon: `No factible - ${motivoOnAir}`,
+    diametroAntena: 'N/A',
+    tipoEnlace: 'Torre No Operativa',
+    distancia: distanciaKm,
+    detalles: detallesValidacion
+  };
+}
+  if (onAirAActivo && onAirBActivo) {
+    detallesValidacion.push(`✅ Torre A: "${OnA}" - Estado operativo confirmado`);
+    detallesValidacion.push(`✅ Torre B: "${OnB}" - Estado operativo confirmado`);
+  } else {
+    detallesValidacion.push(`⚠️ Torre A: "${OnA}" - Estado no claramente definido`);
+    detallesValidacion.push(`⚠️ Torre B: "${OnB}" - Estado no claramente definido`);
+    detallesValidacion.push(`ℹ️ Se asume estado operativo, pero verificar manualmente`);
+  }
+  function esTorreNoFactible(tipoTorre) {
+    const t = tipoTorre.toLowerCase();
+    return t.includes('poste') || 
+           t.includes('monopolo') ||
+           t.includes('mono polo') ||
+           t.includes('mono-polo') ||
+           t.includes('mastil') ||  
+           t.includes('mástil'); 
+  }
+  const torreANoFactible = esTorreNoFactible(torreANorm);
+  const torreBNoFactible = esTorreNoFactible(torreBNorm);
+  if (torreANoFactible || torreBNoFactible) {
+    let motivoTorre = '';
+    if (torreANoFactible && torreBNoFactible) {
+      motivoTorre = `Ambas torres son de tipo no compatible (A: ${torreA}, B: ${torreB})`;
+      detallesValidacion.push(`❌ Torre A: "${torreA}" - Tipo no factible`);
+      detallesValidacion.push(`❌ Torre B: "${torreB}" - Tipo no factible`);
+    } else if (torreANoFactible) {
+      motivoTorre = `Torre A es de tipo no compatible: "${torreA}"`;
+      detallesValidacion.push(`❌ Torre A: "${torreA}" - Tipo no factible`);
+      detallesValidacion.push(`✅ Torre B: "${torreB}" - Tipo compatible`);
+    } else {
+      motivoTorre = `Torre B es de tipo no compatible: "${torreB}"`;
+      detallesValidacion.push(`✅ Torre A: "${torreA}" - Tipo compatible`);
+      detallesValidacion.push(`❌ Torre B: "${torreB}" - Tipo no factible`);
+    }
+    detallesValidacion.push('⚠️ Los tipos de torre "poste" y "monopolo" no son compatibles para enlaces PtP');
+    return {
+      factible: false,
+      razon: `No factible - ${motivoTorre}`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Torre Incompatible',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  detallesValidacion.push(`✅ Torre A: "${torreA}" - Tipo compatible para enlace PtP`);
+  detallesValidacion.push(`✅ Torre B: "${torreB}" - Tipo compatible para enlace PtP`);
+  const alturaLibre = parseFloat(document.getElementById('alturaLibre').value);
+  const alturaDisponible = parseFloat(document.getElementById('alturaDisponible').value);
+  if (!isNaN(alturaLibre) && !isNaN(alturaDisponible)) {
+    if (alturaDisponible < alturaLibre) {
+      detallesValidacion.push(`❌ Línea de vista obstruida: Altura disponible (${alturaDisponible.toFixed(2)} m) < Altura libre necesaria (${alturaLibre.toFixed(2)} m)`);
+      return {
+        factible: false,
+        razon: 'No factible - Línea de vista obstruida (altura insuficiente)',
+        diametroAntena: 'N/A',
+        tipoEnlace: 'LOS Obstruida',
+        distancia: distanciaKm,
+        detalles: detallesValidacion
+      };
+    } else {
+      detallesValidacion.push(`✅ Línea de vista: Altura disponible (${alturaDisponible.toFixed(2)} m) ≥ Altura libre necesaria (${alturaLibre.toFixed(2)} m)`);
+    }
+  }
+  function calcularDiametroAntena(distancia, esArrendamiento = false) {
+    if (esArrendamiento) {
+      if (distancia <= 3.1) return '1 pie';
+      if (distancia <= 8) return '2 pies';
+      if (distancia <= 13.5) return '3 pies';
+      return 'No factible';
+    }
+    if (distancia >= 0 && distancia <= 3) return '1 pie';
+  if (distancia > 3 && distancia <= 5) return '2 pies';
+  if (distancia > 5 && distancia <= 10) return '3 pies';
+  if (distancia > 10 && distancia <= 17) return '4 pies';
+  if (distancia > 17 && distancia <= 50) return '6 pies';
+  return 'No factible';
+}
+   function validarCapacidadAntena(distancia, diametro, esArrendamiento = false) {
+    if (esArrendamiento) {
+      if (diametro === '1 pie') return distancia <= 3.1;
+      if (diametro === '2 pies') return distancia > 3.1 && distancia <= 8;
+      if (diametro === '3 pies') return distancia > 8 && distancia <= 14;
+      return false;
+    }
+  if (diametro === '1 pie') return distancia >= 0 && distancia <= 3;
+  if (diametro === '2 pies') return distancia > 3 && distancia <= 5;
+  if (diametro === '3 pies') return distancia > 5 && distancia <= 10;
+  if (diametro === '4 pies') return distancia > 10 && distancia <= 17;
+  if (diametro === '6 pies') return distancia > 17 && distancia <= 50;
+  return false;
+}
+  function esArrendada(tipoArrendamiento) {
+    return tipoArrendamiento.includes('arrendada') || 
+           tipoArrendamiento.includes('arrendamiento') ||
+           tipoArrendamiento.includes('renta');
+  }
+  function esAdquisicion(tipoArrendamiento) {
+    return tipoArrendamiento.includes('adquisición') || 
+           tipoArrendamiento.includes('adquisicion') ||
+           tipoArrendamiento.includes('compra') ||
+           tipoArrendamiento.includes('propia');
+  }
+  function esFibra(tipoTransporte) {
+    return tipoTransporte.includes('fibra') || 
+           tipoTransporte.includes('óptica') ||
+           tipoTransporte.includes('optica') ||
+           tipoTransporte.includes('fo');
+  }
+function esSatelital(tipoTransporte) {
+  return tipoTransporte.includes('starlink') || 
+         tipoTransporte.includes('orbita') ||
+         tipoTransporte.includes('satelite-oa') ||
+         tipoTransporte.includes('satelital') ||
+         tipoTransporte.includes('satellite');
+  }
+  const transporteBNulo = transBNorm === 'n/a' || transBNorm === '0' || transBNorm === '' || transBNorm === 'na';
+if (transporteBNulo) {
+  const fibraA = esFibra(transANorm);
+  detallesValidacion.push('✅ Transporte en B está vacío/N/A/0, se permite enlace si A tiene fibra óptica');
+  if (!fibraA) {
+    detallesValidacion.push('❌ Torre A debe tener Fibra Óptica');
+    return {
+      factible: false,
+      razon: `No factible - Torre A debe tener Fibra Óptica`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Transporte Incompatible',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  diametroAntena = calcularDiametroAntena(distanciaKm, false);
+  detallesValidacion.push(`📡 Antenas requeridas: ${diametroAntena} (según distancia ${distanciaKm.toFixed(2)}km)`);
+  if (validarCapacidadAntena(distanciaKm, diametroAntena)) {
+    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antenas de ${diametroAntena}`);
+    factible = true;
+    razon = `Enlace factible - Fibra en A, B vacío, distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`;
+  } else {
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas de ${diametroAntena}`);
+    factible = false;
+    razon = `No factible - Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas ${diametroAntena}`;
+  }
+  return { 
+    factible, 
+    razon, 
+    diametroAntena, 
+    tipoEnlace: 'Fibra A / B vacío', 
+    distancia: distanciaKm, 
+    detalles: detallesValidacion 
+  };
+}
+if (!transA || !transB) {
+  detallesValidacion.push('⚠️ Falta información de tipo de transporte');
+  return {
+    factible: false,
+    razon: 'No factible - Información incompleta de transporte',
+    diametroAntena: 'N/A',
+    tipoEnlace: 'Datos Incompletos',
+    distancia: distanciaKm,
+    detalles: detallesValidacion
+  };
+}
+  if (!transA || !transB) {
+    detallesValidacion.push('⚠️ Falta información de tipo de transporte');
+    return {
+      factible: false,
+      razon: 'No factible - Información incompleta de transporte',
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Datos Incompletos',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+if (transANorm === transBNorm) {
+  if (!permitirMismoTransporte) {
+    detallesValidacion.push(`❌ Ambas torres tienen el mismo transporte: "${transA}"`);
+    return {
+      factible: false,
+      razon: `No factible - Ambas torres tienen el mismo tipo de transporte (${transA})`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Transporte Duplicado',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  } else {
+    detallesValidacion.push(`✅ Permitiendo mismo tipo de transporte: "${transA}"`);
+  
+    const esSatA = esSatelital(transANorm);
+    const esSatB = esSatelital(transBNorm);
+    diametroAntena = calcularDiametroAntena(distanciaKm, true);
+    if (esSatA && esSatB && validarCapacidadAntena(distanciaKm, diametroAntena, true)) {
+      detallesValidacion.push(`✅ Ambos sitios tienen transporte satelital y antena compatible`);
+      return {
+        factible: true,
+        razon: `Enlace factible - Mismo tipo de transporte permitido (${transA}), distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`,
+        diametroAntena,
+        tipoEnlace: 'Mismo Transporte Permitido',
+        distancia: distanciaKm,
+        detalles: detallesValidacion
+      };
+    } else {
+      detallesValidacion.push(`❌ Ambos sitios deben tener transporte satelital y antena compatible`);
+      return {
+        factible: false,
+        razon: `No factible - Ambos sitios deben tener transporte satelital y antena compatible`,
+        diametroAntena,
+        tipoEnlace: 'Mismo Transporte Permitido',
+        distancia: distanciaKm,
+        detalles: detallesValidacion
+      };
+    }
+  }
+}else if (transANorm === transBNorm && permitirMismoTransporte) {
+  detallesValidacion.push(`✅ Permitiendo mismo tipo de transporte: "${transA}"`);
+  // Continúa con el análisis normal (no retornes aquí)
+}
+  const esArrendadaA = esArrendada(arreANorm);
+  const esArrendadaB = esArrendada(arreBNorm);
+
+// ...dentro de la función analizarFactibilidadPermisiva, reemplaza el bloque de arrendadas por este:
+
+if (esArrendadaA || esArrendadaB) {
+  diametroAntena = calcularDiametroAntena(distanciaKm, true);
+  tipoEnlace = 'Torres Arrendadas';
+
+  detallesValidacion.push(`📍 Torre A: ${esArrendadaA ? 'Arrendada' : 'Propia'}`);
+  detallesValidacion.push(`📍 Torre B: ${esArrendadaB ? 'Arrendada' : 'Propia'}`);
+  detallesValidacion.push(`📡 Antena asignada: ${diametroAntena} (según distancia)`);
+
+  // EXCEPCIÓN: Si está permitido mismo transporte y ambos extremos son satelitales (Starlink/Satelite-OA), es FACTIBLE sin exigir fibra ni satelital específico
+  const esSatA = esSatelital(transANorm);
+  const esSatB = esSatelital(transBNorm);
+if (permitirMismoTransporte && esSatA && esSatB) {
+  detallesValidacion.push('✅ Permitiendo cualquier combinación de transporte satelital en torres arrendadas. No se exige fibra, pero se respeta el límite de distancia y diámetro de antena.');
+  if (diametroAntena === 'No factible') {
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede el rango permitido para torres arrendadas (máx: 13.5km)`);
+    factible = false;
+    razon = `No factible - Distancia excede el rango permitido para torres arrendadas`;
+  } else if (validarCapacidadAntena(distanciaKm, diametroAntena, true)) {
+    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antena de ${diametroAntena}`);
+    factible = true;
+    razon = `Enlace factible - Mismo tipo de transporte satelital permitido (${transA} / ${transB}), distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`;
+  } else {
+    detallesValidacion.push(`❌ Configuración no válida para torres arrendadas`);
+    razon = `No factible - Distancia excesiva o antena incompatible`;
+    factible = false;
+  }
+  return {
+    factible,
+    razon,
+    diametroAntena,
+    tipoEnlace: 'Mismo Transporte Satelital Arrendada',
+    distancia: distanciaKm,
+    detalles: detallesValidacion
+  };
+}
+
+  // Validación normal si no es el caso especial
+  const fibraA = esFibra(transANorm);
+  const satelitalB = esSatelital(transBNorm);
+
+  if (!fibraA) {
+    detallesValidacion.push('❌ Torre A debe tener Fibra Óptica');
+  } else {
+    detallesValidacion.push('✅ Torre A tiene Fibra Óptica');
+  }
+  if (!satelitalB) {
+    detallesValidacion.push('❌ Torre B debe tener Starlink u Satelite-OA');
+  } else {
+    detallesValidacion.push('✅ Torre B tiene transporte Satelite-OA');
+  }
+
+  if (diametroAntena === 'No factible') {
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede el rango permitido para torres arrendadas (máx: 13.5km)`);
+    factible = false;
+    razon = `No factible - Distancia excede el rango permitido para torres arrendadas`;
+  } else if (
+    (fibraA && satelitalB && validarCapacidadAntena(distanciaKm, diametroAntena, true)) ||
+    (transANorm === transBNorm && validarCapacidadAntena(distanciaKm, diametroAntena, true)) // Permite mismo transporte
+  ) {
+    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antena de ${diametroAntena}`);
+    factible = true;
+    razon = `Enlace factible - Configuración arrendada válida, distancia: ${distanciaKm.toFixed(2)}km`;
+    if (diametroAntena === '3 pies') {
+      detallesValidacion.push('⚠️ Antena de 3 pies en torre arrendada: requiere análisis adicional.');
+      return {
+        factible: true,
+        razon: 'FACTIBLE (Requiere análisis: antena de 3 pies en torre arrendada)',
+        diametroAntena,
+        tipoEnlace,
+        distancia: distanciaKm,
+        detalles: detallesValidacion,
+        advertencia: true
+      };
+    }
+  } else {
+    detallesValidacion.push(`❌ Configuración no válida para torres arrendadas`);
+    razon = `No factible - ${!fibraA ? 'Torre A sin fibra' : ''} ${!satelitalB ? 'Torre B sin satelital' : ''} ${!validarCapacidadAntena(distanciaKm, diametroAntena, true) ? 'Distancia excesiva' : ''}`.trim();
+    factible = false;
+  }
+  return { factible, razon, diametroAntena, tipoEnlace, distancia: distanciaKm, detalles: detallesValidacion };
+}
+  const esAdquisicionA = esAdquisicion(arreANorm);
+  const esAdquisicionB = esAdquisicion(arreBNorm);
+  if (esAdquisicionA && esAdquisicionB) {
+    tipoEnlace = 'Torres de Adquisición';
+    detallesValidacion.push('🏢 Ambas torres son de adquisición (mayor flexibilidad)');
+  } else {
+    tipoEnlace = 'Torres Mixtas';
+    detallesValidacion.push(`🏢 Torre A: ${esAdquisicionA ? 'Adquisición' : 'Otro'}, Torre B: ${esAdquisicionB ? 'Adquisición' : 'Otro'}`);
+  }
+  diametroAntena = calcularDiametroAntena(distanciaKm, false);
+  detallesValidacion.push(`📡 Antenas requeridas: ${diametroAntena} (según distancia ${distanciaKm.toFixed(2)}km)`);
+  if (validarCapacidadAntena(distanciaKm, diametroAntena)) {
+    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antenas de ${diametroAntena}`);
+    factible = true;
+    razon = `Enlace factible - Fibra+Satelital, distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`;
+  } else {
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas de ${diametroAntena}`);
+    factible = false;
+    razon = `No factible - Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas ${diametroAntena}`;
+  }
+  return { 
+    factible, 
+    razon, 
+    diametroAntena, 
+    tipoEnlace, 
+    distancia: distanciaKm, 
+    detalles: detallesValidacion 
+  };
+  function verificarLineaDeVista(elevaciones, lineaVista, fresnel) {
+  for (let i = 0; i < elevaciones.length; i++) {
+    if (elevaciones[i] > fresnel[i]) {
+      return false; 
+    }
+  }
+  return true; 
+}
+// Agregar dentro de la función analizarFactibilidad, después de la validación de transporteBNulo
+
+// Verificar si ambos transportes son satelitales
+const satelitalA = esSatelital(transANorm);
+const satelitalB = esSatelital(transBNorm);
+
+if (satelitalA && satelitalB) {
+   const validacionSatelital = validarEnlaceSatelital(distanciaKm);
+  if (!validacionSatelital.factible) {
+    detallesValidacion.push(`❌ ${validacionSatelital.mensaje}`);
+    return {
+      factible: false,
+      razon: `No factible - ${validacionSatelital.mensaje}`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Satelital-Satelital',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  diametroAntena = calcularDiametroAntena(distanciaKm, false);
+  tipoEnlace = 'Satelital-Satelital';
+  
+  detallesValidacion.push('📡 Torre A: Transporte Satelital');
+  detallesValidacion.push('📡 Torre B: Transporte Satelital');
+  detallesValidacion.push(`📡 Antenas requeridas: ${diametroAntena} (según distancia ${distanciaKm.toFixed(2)}km)`);
+
+  if (validarCapacidadAntena(distanciaKm, diametroAntena)) {
+    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antenas de ${diametroAntena}`);
+    factible = true;
+    razon = `Enlace factible - Configuración Satelital-Satelital, distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`;
+  } else {
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas de ${diametroAntena}`);
+    factible = false;
+    razon = `No factible - Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas ${diametroAntena}`;
+  }
+
+  return { 
+    factible, 
+    razon, 
+    diametroAntena, 
+    tipoEnlace, 
+    distancia: distanciaKm, 
+    detalles: detallesValidacion 
+  };
+}
+
+}
+function analizarFactibilidadPermisiva(distanciaKm, arreA, arreB, transA, transB, torreA, torreB, OnA, OnB, esFactibleLOS = true) {
+  let factible = false;
+  let razon = '';
+  let diametroAntena = '';
+  let tipoEnlace = '';
+  let detallesValidacion = [];
+  if (!distanciaKm || isNaN(distanciaKm) || distanciaKm <= 0) {
+    return {
+      factible: false,
+      razon: 'No factible - Distancia inválida o cero',
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Error de Datos',
+      distancia: distanciaKm,
+      detalles: ['❌ Error en cálculo de distancia']
+    };
+  }
+  const DISTANCIA_MAXIMA = 50;
+  if (distanciaKm > DISTANCIA_MAXIMA) {
+    return {
+      factible: false,
+      razon: `No factible - Distancia excesiva (${distanciaKm.toFixed(2)}km > ${DISTANCIA_MAXIMA}km)`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Fuera de Rango',
+      distancia: distanciaKm,
+      detalles: [`❌ Distancia ${distanciaKm.toFixed(2)}km supera el límite máximo de ${DISTANCIA_MAXIMA}km`]
+    };
+  }
+  if (!esFactibleLOS) {
+    return {
+      factible: false,
+      razon: 'No factible - Línea de vista obstruida (perfil de elevación)',
+      diametroAntena: 'N/A',
+      tipoEnlace: 'LOS Obstruida',
+      distancia: distanciaKm,
+      detalles: ['❌ Línea de vista obstruida según perfil de elevación']
+    };
+  }
+  // Normalización
+  const arreANorm = (arreA || '').toLowerCase().trim();
+  const arreBNorm = (arreB || '').toLowerCase().trim();
+  const transANorm = (transA || '').toLowerCase().trim();
+  const transBNorm = (transB || '').toLowerCase().trim();
+  const torreANorm = (torreA || '').toLowerCase().trim();
+  const torreBNorm = (torreB || '').toLowerCase().trim();
+  const onAirANorm = (OnA || '').toLowerCase().trim();
+  const onAirBNorm = (OnB || '').toLowerCase().trim();
+
+  function estaOnAir(estadoOnAir) {
+    return estadoOnAir.includes('on air') ||
+      estadoOnAir.includes('onair') ||
+      estadoOnAir.includes('operativo') ||
+      estadoOnAir.includes('activo') ||
+      estadoOnAir.includes('funcionando') ||
+      estadoOnAir === 'si' ||
+      estadoOnAir === 'sí' ||
+      estadoOnAir === 'yes';
+  }
+  function estaPendiente(estadoOnAir) {
+    return estadoOnAir.includes('pendiente') ||
+      estadoOnAir.includes('construcción') ||
+      estadoOnAir.includes('construccion') ||
+      estadoOnAir.includes('instalación') ||
+      estadoOnAir.includes('instalacion') ||
+      estadoOnAir.includes('desarrollo') ||
+      estadoOnAir.includes('proyecto') ||
+      estadoOnAir.includes('planeado') ||
+      estadoOnAir.includes('no operativo') ||
+      estadoOnAir.includes('inactivo') ||
+      estadoOnAir === 'no';
+  }
+  const onAirAActivo = estaOnAir(onAirANorm);
+  const onAirBActivo = estaOnAir(onAirBNorm);
+  const onAirAPendiente = estaPendiente(onAirANorm);
+  const onAirBPendiente = estaPendiente(onAirBNorm);
+
+  if (onAirAPendiente) {
+    let motivoOnAir = `Torre A está pendiente: "${OnA}"`;
+    detallesValidacion.push(`❌ Torre A: "${OnA}" - Estado pendiente/inactivo`);
+    if (onAirBPendiente) {
+      detallesValidacion.push(`✅ Torre B: "${OnB}" - Estado pendiente/inactivo (no bloquea factibilidad)`);
+    } else {
+      detallesValidacion.push(`✅ Torre B: "${OnB}" - Estado operativo`);
+    }
+    detallesValidacion.push('⚠️ La torre A debe estar "On Air" (operativa) para establecer enlaces PtP');
+    return {
+      factible: false,
+      razon: `No factible - ${motivoOnAir}`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Torre No Operativa',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  if (onAirAActivo && onAirBActivo) {
+    detallesValidacion.push(`✅ Torre A: "${OnA}" - Estado operativo confirmado`);
+    detallesValidacion.push(`✅ Torre B: "${OnB}" - Estado operativo confirmado`);
+  } else {
+    detallesValidacion.push(`⚠️ Torre A: "${OnA}" - Estado no claramente definido`);
+    detallesValidacion.push(`⚠️ Torre B: "${OnB}" - Estado no claramente definido`);
+    detallesValidacion.push(`ℹ️ Se asume estado operativo, pero verificar manualmente`);
+  }
+  function esTorreNoFactible(tipoTorre) {
+    const t = tipoTorre.toLowerCase();
+    return t.includes('poste') ||
+      t.includes('monopolo') ||
+      t.includes('mono polo') ||
+      t.includes('mono-polo') ||
+      t.includes('mastil') ||
+      t.includes('mástil');
+  }
+  const torreANoFactible = esTorreNoFactible(torreANorm);
+  const torreBNoFactible = esTorreNoFactible(torreBNorm);
+  if (torreANoFactible || torreBNoFactible) {
+    let motivoTorre = '';
+    if (torreANoFactible && torreBNoFactible) {
+      motivoTorre = `Ambas torres son de tipo no compatible (A: ${torreA}, B: ${torreB})`;
+      detallesValidacion.push(`❌ Torre A: "${torreA}" - Tipo no factible`);
+      detallesValidacion.push(`❌ Torre B: "${torreB}" - Tipo no factible`);
+    } else if (torreANoFactible) {
+      motivoTorre = `Torre A es de tipo no compatible: "${torreA}"`;
+      detallesValidacion.push(`❌ Torre A: "${torreA}" - Tipo no factible`);
+      detallesValidacion.push(`✅ Torre B: "${torreB}" - Tipo compatible`);
+    } else {
+      motivoTorre = `Torre B es de tipo no compatible: "${torreB}"`;
+      detallesValidacion.push(`✅ Torre A: "${torreA}" - Tipo compatible`);
+      detallesValidacion.push(`❌ Torre B: "${torreB}" - Tipo no factible`);
+    }
+    detallesValidacion.push('⚠️ Los tipos de torre "poste" y "monopolo" no son compatibles para enlaces PtP');
+    return {
+      factible: false,
+      razon: `No factible - ${motivoTorre}`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Torre Incompatible',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  detallesValidacion.push(`✅ Torre A: "${torreA}" - Tipo compatible para enlace PtP`);
+  detallesValidacion.push(`✅ Torre B: "${torreB}" - Tipo compatible para enlace PtP`);
+  const alturaLibre = parseFloat(document.getElementById('alturaLibre').value);
+  const alturaDisponible = parseFloat(document.getElementById('alturaDisponible').value);
+  if (!isNaN(alturaLibre) && !isNaN(alturaDisponible)) {
+    if (alturaDisponible < alturaLibre) {
+      detallesValidacion.push(`❌ Línea de vista obstruida: Altura disponible (${alturaDisponible.toFixed(2)} m) < Altura libre necesaria (${alturaLibre.toFixed(2)} m)`);
+      return {
+        factible: false,
+        razon: 'No factible - Línea de vista obstruida (altura insuficiente)',
+        diametroAntena: 'N/A',
+        tipoEnlace: 'LOS Obstruida',
+        distancia: distanciaKm,
+        detalles: detallesValidacion
+      };
+    } else {
+      detallesValidacion.push(`✅ Línea de vista: Altura disponible (${alturaDisponible.toFixed(2)} m) ≥ Altura libre necesaria (${alturaLibre.toFixed(2)} m)`);
+    }
+  }
+  function calcularDiametroAntena(distancia, esArrendamiento = false) {
+    if (esArrendamiento) {
+      if (distancia <= 3.1) return '1 pie';
+      if (distancia <= 8) return '2 pies';
+      if (distancia <= 13.5) return '3 pies';
+      return 'No factible';
+    }
+    if (distancia >= 0 && distancia <= 3) return '1 pie';
+    if (distancia > 3 && distancia <= 5) return '2 pies';
+    if (distancia > 5 && distancia <= 10) return '3 pies';
+    if (distancia > 10 && distancia <= 17) return '4 pies';
+    if (distancia > 17 && distancia <= 50) return '6 pies';
+    return 'No factible';
+  }
+  function validarCapacidadAntena(distancia, diametro, esArrendamiento = false) {
+    if (esArrendamiento) {
+      if (diametro === '1 pie') return distancia <= 3.1;
+      if (diametro === '2 pies') return distancia > 3.1 && distancia <= 8;
+      if (diametro === '3 pies') return distancia > 8 && distancia <= 14;
+      return false;
+    }
+    if (diametro === '1 pie') return distancia >= 0 && distancia <= 3;
+    if (diametro === '2 pies') return distancia > 3 && distancia <= 5;
+    if (diametro === '3 pies') return distancia > 5 && distancia <= 10;
+    if (diametro === '4 pies') return distancia > 10 && distancia <= 17;
+    if (diametro === '6 pies') return distancia > 17 && distancia <= 50;
+    return false;
+  }
+  function esArrendada(tipoArrendamiento) {
+    return tipoArrendamiento.includes('arrendada') ||
+      tipoArrendamiento.includes('arrendamiento') ||
+      tipoArrendamiento.includes('renta');
+  }
+  function esAdquisicion(tipoArrendamiento) {
+    return tipoArrendamiento.includes('adquisición') ||
+      tipoArrendamiento.includes('adquisicion') ||
+      tipoArrendamiento.includes('compra') ||
+      tipoArrendamiento.includes('propia');
+  }
+  function esFibra(tipoTransporte) {
+    return tipoTransporte.includes('fibra') ||
+      tipoTransporte.includes('óptica') ||
+      tipoTransporte.includes('optica') ||
+      tipoTransporte.includes('fo');
+  }
+  function esSatelital(tipoTransporte) {
+    return tipoTransporte.includes('starlink') ||
+      tipoTransporte.includes('orbita') ||
+      tipoTransporte.includes('satelite-oa') ||
+      tipoTransporte.includes('satelital') ||
+      tipoTransporte.includes('satellite');
+  }
+  const transporteBNulo = transBNorm === 'n/a' || transBNorm === '0' || transBNorm === '' || transBNorm === 'na';
+  if (transporteBNulo) {
+    const fibraA = esFibra(transANorm);
+    detallesValidacion.push('✅ Transporte en B está vacío/N/A/0, se permite enlace si A tiene fibra óptica');
+    if (!fibraA) {
+      detallesValidacion.push('❌ Torre A debe tener Fibra Óptica');
+      return {
+        factible: false,
+        razon: `No factible - Torre A debe tener Fibra Óptica`,
+        diametroAntena: 'N/A',
+        tipoEnlace: 'Transporte Incompatible',
+        distancia: distanciaKm,
+        detalles: detallesValidacion
+      };
+    }
+    diametroAntena = calcularDiametroAntena(distanciaKm, false);
+    detallesValidacion.push(`📡 Antenas requeridas: ${diametroAntena} (según distancia ${distanciaKm.toFixed(2)}km)`);
+    if (validarCapacidadAntena(distanciaKm, diametroAntena)) {
+      detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antenas de ${diametroAntena}`);
+      factible = true;
+      razon = `Enlace factible - Fibra en A, B vacío, distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`;
+    } else {
+      detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas de ${diametroAntena}`);
+      factible = false;
+      razon = `No factible - Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas ${diametroAntena}`;
+    }
+    return {
+      factible,
+      razon,
+      diametroAntena,
+      tipoEnlace: 'Fibra A / B vacío',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  if (!transA || !transB) {
+    detallesValidacion.push('⚠️ Falta información de tipo de transporte');
+    return {
+      factible: false,
+      razon: 'No factible - Información incompleta de transporte',
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Datos Incompletos',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  // --- PERMISIVO: Si ambos transportes son iguales, NO bloquea, solo deja un detalle ---
+if (transANorm === transBNorm) {
+  // Si ambos transportes son iguales y uno es Starlink o Satelite-OA, es factible
+  const esStarlinkOA = (t) => t.includes('starlink') || t.includes('satelite-oa') || t.includes('satélite-oa');
+  if (esStarlinkOA(transANorm) || esStarlinkOA(transBNorm)) {
+    detallesValidacion.push(`✅ Ambos sitios tienen el mismo transporte (${transA}) y al menos uno es Starlink o Satelite-OA. Se considera FACTIBLE.`);
+    return {
+      factible: true,
+      razon: `Enlace factible - Mismo tipo de transporte (${transA}) con Starlink/Satelite-OA en A o B.`,
+      diametroAntena: 'N/A',
+      tipoEnlace: 'Mismo Transporte Satelital',
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
+  }
+  // Si no es Starlink/Satelite-OA, solo deja el warning permisivo
+  detallesValidacion.push(`⚠️ Permitiendo mismo tipo de transporte: "${transA}"`);
+}
+  const esArrendadaA = esArrendada(arreANorm);
+  const esArrendadaB = esArrendada(arreBNorm);
+
+  if (esArrendadaA || esArrendadaB) {
+  diametroAntena = calcularDiametroAntena(distanciaKm, true);
+  tipoEnlace = 'Torres Arrendadas';
+
+  detallesValidacion.push(`📍 Torre A: ${esArrendadaA ? 'Arrendada' : 'Propia'}`);
+  detallesValidacion.push(`📍 Torre B: ${esArrendadaB ? 'Arrendada' : 'Propia'}`);
+  detallesValidacion.push(`📡 Antena asignada: ${diametroAntena} (según distancia)`);
+
+  // EXCEPCIÓN: Si está permitido mismo transporte y ambos extremos son satelitales (Starlink/Satelite-OA)
+  const esSatA = esSatelital(transANorm);
+  const esSatB = esSatelital(transBNorm);
+  let omitirValidacionFibra = false;
+  if (permitirMismoTransporte && esSatA && esSatB) {
+    detallesValidacion.push('✅ Permitiendo cualquier combinación de transporte satelital en torres arrendadas. No se exige fibra, pero se respeta el límite de distancia y diámetro de antena.');
+    omitirValidacionFibra = true;
+  }
+
+  // Validación normal si no es el caso especial
+  if (!omitirValidacionFibra) {
+    const fibraA = esFibra(transANorm);
+    const satelitalB = esSatelital(transBNorm);
+
+    if (!fibraA) {
+      detallesValidacion.push('❌ Torre A debe tener Fibra Óptica');
+    } else {
+      detallesValidacion.push('✅ Torre A tiene Fibra Óptica');
+    }
+    if (!satelitalB) {
+      detallesValidacion.push('❌ Torre B debe tener Starlink u Satelite-OA');
+    } else {
+      detallesValidacion.push('✅ Torre B tiene transporte Satelite-OA');
+    }
+  }
+
+  // Validación de distancia y diámetro de antena (NO omitir nunca)
+  if (diametroAntena === 'No factible') {
+  detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede el rango permitido para torres arrendadas (máx: 13.5km)`);
+  factible = false;
+  razon = `No factible - Distancia excede el rango permitido para torres arrendadas`;
+} else if (
+  (omitirValidacionFibra && validarCapacidadAntena(distanciaKm, diametroAntena, true)) ||
+  (!omitirValidacionFibra && ((esFibra(transANorm) && esSatelital(transBNorm) && validarCapacidadAntena(distanciaKm, diametroAntena, true)) ||
+  (transANorm === transBNorm && validarCapacidadAntena(distanciaKm, diametroAntena, true))))
+) {
+  detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antena de ${diametroAntena}`);
+  factible = true;
+  razon = `Enlace factible - Configuración arrendada válida, distancia: ${distanciaKm.toFixed(2)}km`;
+  if (diametroAntena === '3 pies') {
+    detallesValidacion.push('⚠️ Antena de 3 pies en torre arrendada: requiere análisis adicional.');
+    return {
+      factible: true,
+      razon: 'FACTIBLE (Requiere análisis: antena de 3 pies en torre arrendada)',
+      diametroAntena,
+      tipoEnlace,
+      distancia: distanciaKm,
+      detalles: detallesValidacion,
+      advertencia: true
+    };
+  }
+} else {
+  detallesValidacion.push(`❌ Configuración no válida para torres arrendadas`);
+  razon = `No factible - ${!omitirValidacionFibra && !esFibra(transANorm) ? 'Torre A sin fibra' : ''} ${!omitirValidacionFibra && !esSatelital(transBNorm) ? 'Torre B sin satelital' : ''} ${!validarCapacidadAntena(distanciaKm, diametroAntena, true) ? 'Distancia excesiva' : ''}`.trim();
+  factible = false;
+}
+  return { factible, razon, diametroAntena, tipoEnlace, distancia: distanciaKm, detalles: detallesValidacion };
+}
+  const esAdquisicionA = esAdquisicion(arreANorm);
+  const esAdquisicionB = esAdquisicion(arreBNorm);
+  if (esAdquisicionA && esAdquisicionB) {
+    tipoEnlace = 'Torres de Adquisición';
+    detallesValidacion.push('🏢 Ambas torres son de adquisición (mayor flexibilidad)');
+  } else {
+    tipoEnlace = 'Torres Mixtas';
+    detallesValidacion.push(`🏢 Torre A: ${esAdquisicionA ? 'Adquisición' : 'Otro'}, Torre B: ${esAdquisicionB ? 'Adquisición' : 'Otro'}`);
+  }
+  diametroAntena = calcularDiametroAntena(distanciaKm, false);
+  detallesValidacion.push(`📡 Antenas requeridas: ${diametroAntena} (según distancia ${distanciaKm.toFixed(2)}km)`);
+  if (validarCapacidadAntena(distanciaKm, diametroAntena)) {
+    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antenas de ${diametroAntena}`);
+    factible = true;
+    razon = `Enlace factible - Fibra+Satelital, distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`;
+  } else {
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas de ${diametroAntena}`);
+    factible = false;
+    razon = `No factible - Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas ${diametroAntena}`;
+  }
+  return {
+    factible,
+    razon,
+    diametroAntena,
+    tipoEnlace,
+    distancia: distanciaKm,
+    detalles: detallesValidacion
+  };
+}
+
+function verificarLineaDeVista(elevaciones, lineaVista, fresnel) {
+  for (let i = 0; i < elevaciones.length; i++) {
+    if (elevaciones[i] > fresnel[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+// ============================================
+// FUNCIÓN PARA MOSTRAR DETALLES COMPLETOS
+// ============================================
+function mostrarAnalisisDetallado(factibilidad) {
+  let estado = '';
+  let color = '';
+  let icono = '';
+  if (factibilidad.razon && factibilidad.razon.toUpperCase().includes('NO DISPONIBLE')) {
+    estado = 'NO DISPONIBLE';
+    color = '#f59e42';
+    icono = '<i class="fas fa-exclamation-circle" style="color:#f59e42"></i>';
+  } else if (factibilidad.factible) {
+    estado = 'FACTIBLE';
+    color = '#10b981';
+    icono = '<i class="fas fa-check-circle" style="color:#10b981"></i>';
+  } else {
+    estado = 'NO FACTIBLE';
+    color = '#ef4444';
+    icono = '<i class="fas fa-times-circle" style="color:#ef4444"></i>';
+  }
+  const titulo = `Enlace ${estado}`;
+  const resumen = `
+    <b>Distancia:</b> ${factibilidad.distancia?.toFixed(2) || 'N/A'} km<br>
+    <b>Tipo de Enlace:</b> ${factibilidad.tipoEnlace || 'N/A'}<br>
+    <b>Antenas Requeridas:</b> ${factibilidad.diametroAntena || 'N/A'}<br>
+    <b>Estado:</b> <span style="color:${color}; font-weight:bold;">${estado}</span><br>
+    <b>Motivo principal:</b> ${factibilidad.razon || 'N/A'}
+  `;
+  let lista = '';
+  if (factibilidad.detalles && factibilidad.detalles.length > 0) {
+    lista = factibilidad.detalles.map(det => `<li>${det}</li>`).join('');
+  }
+  document.getElementById('modal-analisis-icono').innerHTML = icono;
+  document.getElementById('modal-analisis-titulo').innerHTML = titulo;
+  document.getElementById('modal-analisis-resumen').innerHTML = resumen;
+  document.getElementById('modal-analisis-lista').innerHTML = lista;
+  document.getElementById('modal-analisis').style.display = 'flex';
+}
+function cerrarModalAnalisis() {
+  document.getElementById('modal-analisis').style.display = 'none';
+}
+function agregarOActualizarEnlace() {
+  const get = id => document.getElementById(id).value.trim();
+  const latA = parseFloat(get('latA'));
+  const lonA = parseFloat(get('lonA'));
+  const latB = parseFloat(get('latB'));
+  const lonB = parseFloat(get('lonB'));
+  if (!get('idA') || !get('idB')) {
+    alert('❌ Error: Debes ingresar ID A y ID B');
+    return;
+  }
+  if (isNaN(latA) || isNaN(lonA) || isNaN(latB) || isNaN(lonB)) {
+    alert('❌ Error: Las coordenadas deben ser números válidos para ambos sitios');
+    return;
+  }
+  const distanciaKm = calcularDistancia(latA, lonA, latB, lonB);
+  const frecuencia = asignarFrecuencia(distanciaKm);
+  const factibilidad = analizarFactibilidad(
+    distanciaKm,
+    get('ArreA'),
+    get('ArreB'),
+    get('TransA'),
+    get('TransB'),
+    get('TorreA'),
+    get('TorreB'),
+    get('OnA'),
+    get('OnB'),
+    window.ultimaFactibilidadLOS
+  );
+  const estadoFactible = (factibilidad.advertencia)
+    ? 'FACTIBLE (Requiere análisis)'
+    : (factibilidad.razon && factibilidad.razon.toUpperCase().includes('NO DISPONIBLE'))
+      ? 'NO DISPONIBLE'
+      : (factibilidad.factible ? 'SÍ' : 'NO');
+
+  const filaDatos = [
+    get('idA'), get('nombreA'), get('latA'), get('lonA'),
+    document.getElementById('latArad').value,
+    document.getElementById('lonArad').value,
+    get('idB'), get('nombreB'), get('latB'), get('lonB'),
+    document.getElementById('latBrad').value,
+    document.getElementById('lonBrad').value,
+    distanciaKm.toFixed(6), frecuencia,
+    document.getElementById('disponibilidadAnual').value,
+    get('alturaA'), get('alturaB'), get('ranA'), get('ranB'),
+    get('TransA'), get('TransB'), get('ArreA'), get('ArreB'),
+    get('OnA'), get('OnB'), get('TorreA'), get('TorreB'),
+    get('EstadoA'), get('EstadoB'),
+    estadoFactible,
+    factibilidad.diametroAntena,
+    factibilidad.tipoEnlace,
+    JSON.stringify(factibilidad)
+  ];
+
+  const esMismoTransporte = (
+    permitirMismoTransporte &&
+    get('TransA').toLowerCase() === get('TransB').toLowerCase()
+  );
+
+  if (esMismoTransporte) {
+    let enlaces = JSON.parse(localStorage.getItem('enlacesMismoTransporte') || '[]');
+    enlaces.push(filaDatos);
+    localStorage.setItem('enlacesMismoTransporte', JSON.stringify(enlaces));
+    mostrarPestana('mismoTransporte');
+    mostrarTablaMismoTransporte();
+    limpiarFormulario();
+    return;
+  }
+
+  // Si está activo el modo permisivo pero los transportes son diferentes, NO agregues a Mis Enlaces
+  if (permitirMismoTransporte) {
+    limpiarFormulario();
+    return;
+  }
+
+  // --- Agrega a Mis Enlaces (modo normal) ---
+  if (filaEditando) {
+    const celdas = filaEditando.querySelectorAll('td');
+    filaDatos.forEach((val, i) => {
+      if (!celdas[i]) return;
+      if (i === 33) {
+        celdas[i].innerHTML = '';
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-info btn-sm';
+        btn.innerHTML = '<i class="fas fa-info-circle"></i> Ver Análisis';
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          try {
+            const analisis = JSON.parse(val);
+            mostrarAnalisisDetallado(analisis);
+          } catch {
+            alert('No hay análisis detallado disponible.');
+          }
+        };
+        celdas[i].appendChild(btn);
+        celdas[i].dataset.analisis = val;
+      } else {
+        celdas[i].textContent = val;
+      }
+    });
+    aplicarEstiloFactibilidad(filaEditando, factibilidad.factible);
+    filaEditando.classList.remove('selected');
+    filaEditando = null;
+    document.getElementById('agregarBtn').innerHTML = '<i class="fas fa-check"></i> Agregar Enlace';
+    document.getElementById('eliminarBtn').disabled = true;
+  } else {
+    const fila = document.createElement('tr');
+    const tdCheck = document.createElement('td');
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.className = 'check-enlace';
+    check.onclick = function(e) {
+      e.stopPropagation();
+      actualizarBotonEliminarSeleccionados();
+    };
+    tdCheck.appendChild(check);
+    fila.appendChild(tdCheck);
+
+    filaDatos.forEach((val, i) => {
+      const td = document.createElement('td');
+      if (i === 33) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-info btn-sm';
+        btn.innerHTML = '<i class="fas fa-info-circle"></i> Ver Análisis';
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          try {
+            const analisis = JSON.parse(val);
+            mostrarAnalisisDetallado(analisis);
+          } catch {
+            alert('No hay análisis detallado disponible.');
+          }
+        };
+        td.appendChild(btn);
+        td.dataset.analisis = val;
+      } else {
+        td.textContent = val;
+      }
+      fila.appendChild(td);
+    });
+    document.querySelector('#tabla tbody').appendChild(fila);
+  }
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+  ordenarTablaPorFactibilidad();
+  mostrarPestana('enlaces');
+  guardarEnlacesEnStorage();
+}
+function aplicarEstiloFactibilidad(fila, esFactible, razon = "") {
+  fila.classList.remove('enlace-factible', 'enlace-no-factible');
+  const celdas = fila.querySelectorAll('td');
+  if (celdas[28]) {
+    celdas[28].classList.remove('factible', 'no-factible');
+    if (esFactible) {
+      fila.classList.add('enlace-factible');
+      celdas[28].classList.add('factible');
+      celdas[28].title = razon || "Enlace factible";
+    } else {
+      fila.classList.add('enlace-no-factible');
+      celdas[28].classList.add('no-factible');
+      celdas[28].title = razon || "Enlace no factible";
+    }
+  }
+}
+function cargarFilaEnFormulario(fila) {
+  const celdas = fila.querySelectorAll('td');
+ const ids = [
+  'idA','nombreA','latA','lonA','latArad','lonArad',
+  'idB','nombreB','latB','lonB','latBrad','lonBrad',
+  'distancia','frecuencia','disponibilidadAnual', 
+  'alturaA', 
+  'alturaB', 
+  'ranA','ranB','TransA','TransB','ArreA','ArreB',
+  'OnA','OnB','TorreA','TorreB','EstadoA','EstadoB'
+];
+  ids.forEach((id, i) => {
+    if (document.getElementById(id) && celdas[i+1]) {
+      let valor = celdas[i+1].textContent.trim();
+      if (['latA','lonA','latB','lonB','alturaA','alturaB','frecuencia'].includes(id)) {
+        valor = valor.replace(',', '.').replace(/[^0-9\.\-]/g, '');
+      }
+      document.getElementById(id).value = valor;
+    }
+  });
+  actualizarCalculos();
+}
+function validarFactibilidadEnTiempoReal() {
+  const campos = ['latA', 'lonA', 'latB', 'lonB', 'ArreA', 'ArreB', 'TransA', 'TransB'];
+  campos.forEach(campo => {
+    const elemento = document.getElementById(campo);
+    if (elemento) {
+      elemento.addEventListener('blur', () => {
+        mostrarVistaPrevia();
+      });
+    }
+  });
+}
+function mostrarVistaPrevia() {
+  const get = id => document.getElementById(id).value.trim();
+  const latA = parseFloat(get('latA'));
+  const lonA = parseFloat(get('lonA'));
+  const latB = parseFloat(get('latB'));
+  const lonB = parseFloat(get('lonB'));
+  if (latA && lonA && latB && lonB) {
+    const distanciaKm = calcularDistancia(latA, lonA, latB, lonB);
+    const factibilidad = analizarFactibilidad(
+      distanciaKm,
+      get('ArreA'),
+      get('ArreB'),
+      get('TransA'),
+      get('TransB')
+    );
+    const preview = document.getElementById('vista-previa');
+    if (preview) {
+      const color = factibilidad.factible ? '#10b981' : '#ef4444';
+      const icono = factibilidad.factible ? '✅' : '❌';
+      preview.innerHTML = `
+        <div style="color: ${color}; font-weight: bold;">
+          ${icono} ${factibilidad.factible ? 'FACTIBLE' : 'NO FACTIBLE'}
+          <br><small>${factibilidad.razon}</small>
+        </div>
+      `;
+    }
+  }
+}
+function eliminarEnlace() {
+  if (!filaEditando) {
+    alert('⚠️ Debes seleccionar una fila para eliminar');
+    return;
+  }
+  const idA = filaEditando.querySelector('td:first-child').textContent;
+  const idB = filaEditando.querySelector('td:nth-child(7)').textContent;
+  
+  if (!confirm(`¿Seguro quieres eliminar el enlace entre ${idA} y ${idB}?`)) {
+    return;
+  }
+  filaEditando.remove();
+  filaEditando = null;
+  limpiarFormulario();
+  document.getElementById('agregarBtn').innerHTML = '<i class="fas fa-check"></i> Agregar Enlace';
+  document.getElementById('eliminarBtn').disabled = true;
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+if (
+  permitirMismoTransporte &&
+  document.getElementById('TransA').value.trim().toLowerCase() === document.getElementById('TransB').value.trim().toLowerCase()
+) {
+  guardarEnlacesEnStorageModo("mismo");
+} else {
+  guardarEnlacesEnStorageModo("normal");
+}
+  alert('✅ Enlace eliminado correctamente');
+}
+ function limpiarFormulario() { 
+  const campos = [
+    'idA','nombreA','latA','lonA','latArad','lonArad',
+    'idB','nombreB','latB','lonB','latBrad','lonBrad',
+    'distancia','frecuencia','alturaA','alturaB','ranA','ranB',
+    'TransA','TransB','ArreA','ArreB','OnA','OnB','TorreA','TorreB','EstadoA','EstadoB'
+  ];
+     campos.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('agregarBtn').innerHTML = '<i class="fas fa-check"></i> Agregar Enlace';
+  document.getElementById('eliminarBtn').disabled = true;
+  filaEditando = null;
+  window.ultimaFactibilidadLOS = undefined;
+}
+  function exportarExcel() {
+  // 1. Obtén filas de la tabla principal
+  const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
+  // 2. Obtén filas de la tabla de mismo transporte
+  const filasMismo = [];
+  const tablaMismo = document.getElementById('tabla-mismo-tipo');
+  if (tablaMismo) {
+    Array.from(tablaMismo.querySelectorAll('tbody tr')).forEach(tr => filasMismo.push(tr));
+  }
+  // 3. Une ambas listas
+  const filas = filasNormales.concat(filasMismo);
+
+  if (filas.length === 0) {
+    alert('No hay enlaces para exportar');
+    return;
+  }
+
+  // 4. Construye los datos para Excel
+  const encabezado = [
+    'ID A','Nombre A','Latitud A','Longitud A','Lat A (rad)','Lon A (rad)',
+    'ID B','Nombre B','Latitud B','Longitud B','Lat B (rad)','Lon B (rad)',
+    'Distancia (km)','Frecuencia (GHz)','Disponibilidad',
+    'Altura Torre A','Altura Torre B','Altura RAN A','Altura RAN B',
+    'Transporte A','Transporte B','Arrendamiento A','Arrendamiento B',
+    'On Air A','On Air B','Tipo Torre A','Tipo Torre B','Estado A','Estado B',
+    'Factible','Antenas','Tipo Enlace','Análisis'
+  ];
+  const datos = filas.map(fila => {
+    const c = fila.querySelectorAll('td');
+    // 33 columnas, igual que la tabla
+    return Array.from({length: 33}, (_, i) => c[i+1]?.textContent || "");
+  });
+  const wsData = [encabezado].concat(datos);
+
+  // 5. Exporta a Excel
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  XLSX.utils.book_append_sheet(wb, ws, "EnlacesPtP");
+  XLSX.writeFile(wb, "enlaces_ptp.xlsx");
+}
+document.addEventListener('DOMContentLoaded', function() {
+  const btnBorrarPares = document.getElementById('borrar-archivo-pares');
+if (btnBorrarPares) {
+  btnBorrarPares.addEventListener('click', borrarArchivoPares);
+}
+  document.getElementById('eliminarBtn').addEventListener('click', eliminarEnlace);
+  const btnBorrar = document.getElementById('borrar-archivo');
+  if (btnBorrar) {
+    btnBorrar.addEventListener('click', borrarArchivo);
+  }
+  cargarArchivoDeStorage();
+  cargarEnlacesDeStorage();
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+  cargarArchivoParesDeStorage();
+});
+let enlacesSeleccionados = new Set();
+function seleccionarTodo() {
+  const tabla = document.querySelector('.seleccion-container table tbody');
+  if (!tabla) return;
+  const filas = tabla.querySelectorAll('tr');
+  filas.forEach(fila => {
+    fila.classList.add('selected');
+    enlacesSeleccionados.add(fila.dataset.id);
+  });
+  actualizarContadorSeleccionados();
+  document.getElementById('eliminarSeleccionadosBtn').disabled = false;
+}
+
+function deseleccionarTodo() {
+  const tabla = document.querySelector('.seleccion-container table tbody');
+  if (!tabla) return;
+  const filas = tabla.querySelectorAll('tr');
+  filas.forEach(fila => {
+    fila.classList.remove('selected');
+  });
+  enlacesSeleccionados.clear();
+  actualizarContadorSeleccionados();
+  document.getElementById('eliminarSeleccionadosBtn').disabled = true;
+}
+function actualizarContadorSeleccionados() {
+  document.getElementById('enlaces-seleccionados').textContent = enlacesSeleccionados.size;
+}
+function eliminarSeleccionados() {
+  if (enlacesSeleccionados.size === 0) {
+    alert('⚠️ Debes seleccionar al menos un enlace para eliminar');
+    return;
+  }
+  if (!confirm(`¿Seguro quieres eliminar ${enlacesSeleccionados.size} enlaces seleccionados?`)) {
+    return;
+  }
+  enlacesSeleccionados.forEach(id => {
+    const fila = document.querySelector(`tr[data-id="${id}"]`);
+    if (fila) fila.remove();
+  });
+  enlacesSeleccionados.clear();
+  actualizarContadorSeleccionados();
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+  guardarEnlacesEnStorage();
+  document.getElementById('eliminarSeleccionadosBtn').disabled = true;
+  alert('✅ Enlaces eliminados correctamente');
+}
+function mostrarPestana(pestana, event) {
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  const tabContent = document.getElementById('tab-' + pestana);
+  if (tabContent) tabContent.classList.add('active');
+  if (event) event.currentTarget.classList.add('active');
+  if (pestana === 'enlaces') {
+  if (permitirMismoTransporte) {
+    document.querySelector('#tabla tbody').innerHTML = '';
+    actualizarContadorEnlaces();
+    verificarEnlacesVacios();
+  } else {
+    cargarEnlacesDeStorageModo("normal");
+    ordenarTablaPorFactibilidad();
+  }
+}
+  if (pestana === 'resumen') mostrarMapaEnlaces(null);
+  if (pestana === 'mismoTransporte') {
+    mostrarTablaMismoTransporte(); // <-- asegúrate de que esto está aquí
+  }
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+}
+document.getElementById('inputFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    dataExcel = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    const archivoInfo = {
+      nombre: file.name,
+      tamaño: file.size,
+      filas: dataExcel.length,
+      fechaCarga: new Date().toISOString()
+    };
+    localStorage.setItem('archivoExcelInfo', JSON.stringify(archivoInfo));
+    guardarArchivoExcelEnIndexedDB(file.name, e.target.result, archivoInfo);
+    mostrarArchivoCargado(archivoInfo);
+    alert(`✅ Archivo cargado exitosamente!\n📁 ${file.name}\n📊 ${dataExcel.length} filas procesadas`);
+  };
+  reader.readAsArrayBuffer(file);
+});
+document.getElementById('inputFilePairs').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    dataPares = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    const archivoInfo = {
+      nombre: file.name,
+      tamaño: file.size,
+      filas: dataPares.length,
+      fechaCarga: new Date().toISOString()
+    };
+    localStorage.setItem('archivoParesInfo', JSON.stringify(archivoInfo));
+    guardarArchivoParesEnIndexedDB(file.name, e.target.result, archivoInfo);
+    const contenedor = document.getElementById('archivo-pares-cargado');
+    const nombreArchivo = document.getElementById('nombre-archivo-pares');
+    const infoArchivo = document.getElementById('info-archivo-pares');
+    if (contenedor && nombreArchivo && infoArchivo) {
+      nombreArchivo.textContent = archivoInfo.nombre;
+      infoArchivo.textContent = `${archivoInfo.filas} filas • ${(archivoInfo.tamaño / 1024).toFixed(1)} KB • Cargado: ${new Date(archivoInfo.fechaCarga).toLocaleString()}`;
+      contenedor.style.display = 'block';
+      document.getElementById('inputFilePairs').style.display = 'none';
+    }
+    alert(`✅ Archivo de pares cargado exitosamente!\n📁 ${file.name}\n📊 ${dataPares.length} filas procesadas`);
+  };
+  reader.readAsArrayBuffer(file);
+});
+function procesarPares() {
+  let faltantes = [];
+  if (!dataExcel.length) {
+    alert('❌ Error: Primero debes cargar el Excel con los datos de las torres');
+    return;
+  }
+  if (!dataPares.length) {
+    alert('❌ Error: No hay pares de IDs para procesar');
+    return;
+  }
+
+  // Loader visual
+  let loader = document.createElement('div');
+  loader.id = 'loader-procesando';
+  loader.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(10,20,40,0.85);color:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;font-size:2rem;font-weight:800;';
+  loader.innerHTML = `
+    <div>
+      <i class="fas fa-cog fa-spin"></i> Procesando pares, por favor espera...
+      <br>
+      <span id="progreso-pares" style="font-size:1.3rem;display:block;margin-top:18px;"></span>
+    </div>
+  `;
+  document.body.appendChild(loader);
+
+  const mapaTorres = {};
+  dataExcel.forEach(row => {
+    if (row[0]) mapaTorres[row[0].toString().trim().toUpperCase()] = row;
+  });
+
+  let index = 0;
+  const batchSize = 1000;
+  let procesados = 0;
+  let omitidos = 0;
+  const filasDiferenteTransporte = [];
+  const filasMismoTransporte = [];
+
+  function procesarLote() {
+    const start = index;
+    const end = Math.min(index + batchSize, dataPares.length);
+    for (let i = start; i < end; i++) {
+      const par = dataPares[i];
+      const idA = par[0]?.toString().trim().toUpperCase();
+      const idB = par[1]?.toString().trim().toUpperCase();
+      if (!idA || !idB) {
+        omitidos++;
+        continue;
+      }
+      const datosTorreA = mapaTorres[idA] || [];
+      const datosTorreB = mapaTorres[idB] || [];
+      if (datosTorreA.length === 0 || datosTorreB.length === 0) {
+        faltantes.push([
+          idA, idB,
+          datosTorreA.length === 0 ? 'FALTA A' : '',
+          datosTorreB.length === 0 ? 'FALTA B' : ''
+        ]);
+      }
+      // AUTOCOMPLETAR DIRECTAMENTE, SI NO HAY DATOS, DEJA VACÍO
+      document.getElementById('idA').value = idA;
+      document.getElementById('nombreA').value = datosTorreA[3] || '';
+      document.getElementById('latA').value = datosTorreA[11] || '';
+      document.getElementById('lonA').value = datosTorreA[12] || '';
+      document.getElementById('alturaA').value = datosTorreA[51] || '';
+      document.getElementById('ranA').value = datosTorreA[52] || '';
+      document.getElementById('TransA').value = datosTorreA[103] || '';
+      document.getElementById('ArreA').value = datosTorreA[4] || '';
+      document.getElementById('OnA').value = datosTorreA[102] || '';
+      document.getElementById('TorreA').value = datosTorreA[21] || '';
+      document.getElementById('EstadoA').value = datosTorreA[13] || '';
+
+      document.getElementById('idB').value = idB;
+      document.getElementById('nombreB').value = datosTorreB[3] || '';
+      document.getElementById('latB').value = datosTorreB[11] || '';
+      document.getElementById('lonB').value = datosTorreB[12] || '';
+      document.getElementById('alturaB').value = datosTorreB[51] || '';
+      document.getElementById('ranB').value = datosTorreB[52] || '';
+      document.getElementById('TransB').value = datosTorreB[103] || '';
+      document.getElementById('ArreB').value = datosTorreB[4] || '';
+      document.getElementById('OnB').value = datosTorreB[102] || '';
+      document.getElementById('TorreB').value = datosTorreB[21] || '';
+      document.getElementById('EstadoB').value = datosTorreB[13] || '';
+
+      // Calcula campos dependientes
+      actualizarCalculos();
+
+      // Crea la fila temporal (aunque falten datos)
+// ...dentro de procesarLote()...
+const get = id => document.getElementById(id).value.trim();
+const latA = parseFloat(get('latA'));
+const lonA = parseFloat(get('lonA'));
+const latB = parseFloat(get('latB'));
+const lonB = parseFloat(get('lonB'));
+if (!get('idA') || !get('idB')) continue;
+if (isNaN(latA) || isNaN(lonA) || isNaN(latB) || isNaN(lonB)) continue;
+const distanciaKm = calcularDistancia(latA, lonA, latB, lonB);
+const frecuencia = asignarFrecuencia(distanciaKm);
+const factibilidad = analizarFactibilidad(
+  distanciaKm,
+  get('ArreA'),
+  get('ArreB'),
+  get('TransA'),
+  get('TransB'),
+  get('TorreA'),
+  get('TorreB'),
+  get('OnA'),
+  get('OnB'),
+  window.ultimaFactibilidadLOS
+);
+const estadoFactible = (factibilidad.advertencia)
+  ? 'FACTIBLE (Requiere análisis)'
+  : (factibilidad.razon && factibilidad.razon.toUpperCase().includes('NO DISPONIBLE'))
+    ? 'NO DISPONIBLE'
+    : (factibilidad.factible ? 'SÍ' : 'NO');
+
+const filaDatos = [
+  get('idA'), get('nombreA'), get('latA'), get('lonA'),
+  document.getElementById('latArad').value,
+  document.getElementById('lonArad').value,
+  get('idB'), get('nombreB'), get('latB'), get('lonB'),
+  document.getElementById('latBrad').value,
+  document.getElementById('lonBrad').value,
+  distanciaKm.toFixed(6), frecuencia,
+  document.getElementById('disponibilidadAnual').value,
+  get('alturaA'), get('alturaB'), get('ranA'), get('ranB'),
+  get('TransA'), get('TransB'), get('ArreA'), get('ArreB'),
+  get('OnA'), get('OnB'), get('TorreA'), get('TorreB'),
+  get('EstadoA'), get('EstadoB'),
+  estadoFactible,
+  factibilidad.diametroAntena,
+  factibilidad.tipoEnlace,
+  JSON.stringify(factibilidad)
+];
+
+const transA = get('TransA').toLowerCase();
+const transB = get('TransB').toLowerCase();
+if (transA && transB && transA === transB) {
+  filasMismoTransporte.push(filaDatos);
+} else {
+  filasDiferenteTransporte.push(filaDatos);
+}
+
+// ...después del for, al guardar en localStorage:
+if (permitirMismoTransporte) {
+  // Guarda TODOS los enlaces solo en enlacesMismoTransporte
+  const todos = filasDiferenteTransporte.concat(filasMismoTransporte);
+  localStorage.setItem('enlacesMismoTransporte', JSON.stringify(todos));
+  localStorage.removeItem('enlacesPtP'); // <-- Borra los de "Mis Enlaces"
+} else {
+  localStorage.setItem('enlacesPtP', JSON.stringify(filasDiferenteTransporte));
+  localStorage.removeItem('enlacesMismoTransporte'); // <-- Borra los de "Mismo Transporte"
+}
+      procesados++;
+    }
+    const progreso = document.getElementById('progreso-pares');
+    if (progreso) {
+      progreso.textContent = `Procesados: ${end} de ${dataPares.length} (${Math.round(100*end/dataPares.length)}%)`;
+    }
+    index = end;
+if (index < dataPares.length) {
+  setTimeout(procesarLote, 1);
+} else {
+  document.querySelector('#tabla tbody').innerHTML = '';
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+  setTimeout(() => {
+    if (document.body.contains(loader)) {
+      document.body.removeChild(loader);
+    }
+    alert(`✅ Procesamiento de pares completado (${procesados} enlaces agregados de ${dataPares.length} pares totales)\n❌ Omitidos por IDs vacíos: ${omitidos}`);
+    mostrarPestana(permitirMismoTransporte ? 'mismoTransporte' : 'enlaces');
+    if (permitirMismoTransporte) {
+      mostrarTablaMismoTransporte();
+    } else {
+      cargarEnlacesDeStorageModo("normal");
+    }
+    if (faltantes.length > 0) {
+      document.getElementById('btnDescargarFaltantes').style.display = 'inline-block';
+      window.paresFaltantes = faltantes;
+    } else {
+      document.getElementById('btnDescargarFaltantes').style.display = 'none';
+    }
+  }, 200);
+}
+  }
+  procesarLote();
+}
+document.getElementById('btnDescargarFaltantes').onclick = function() {
+  if (!window.paresFaltantes || window.paresFaltantes.length === 0) {
+    alert('No hay pares faltantes.');
+    return;
+  }
+  let csv = 'ID_A;ID_B;Falta_A;Falta_B\n';
+  window.paresFaltantes.forEach(par => {
+    csv += par.join(';') + '\n';
+  });
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pares_faltantes.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+// Muestra la tabla de enlaces usando el análisis permisivo
+function mostrarTablaMismoTransporte() {
+  const contenedor = document.getElementById('tabla-mismo-transporte');
+  if (!contenedor) return;
+  const enlaces = JSON.parse(localStorage.getItem('enlacesMismoTransporte') || '[]');
+  if (!enlaces.length) {
+    contenedor.innerHTML = `<div style="color:#ef4444; text-align:center; margin:32px 0;">
+      <i class="fas fa-exclamation-triangle"></i> No hay enlaces procesados con mismo tipo de transporte.
+    </div>`;
+    return;
+  }
+
+  let html = `
+    <div class="enlaces-counter">
+      <i class="fas fa-chart-line"></i> Total de Enlaces (Permisivo): <span id="total-enlaces-mismo">${enlaces.length}</span>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-success" onclick="exportarExcelMismoTransporte()">
+        <i class="fas fa-file-excel"></i> Exportar a Excel
+      </button>
+      <button class="btn btn-secondary" onclick="seleccionarTodosMismoTransporte()">
+        <i class="fas fa-check-double"></i> Seleccionar Todos
+      </button>
+      <button class="btn btn-danger" onclick="eliminarEnlacesSeleccionadosMismo()" id="btnEliminarSeleccionadosMismo" disabled>
+        <i class="fas fa-trash"></i> Eliminar Seleccionados
+      </button>
+      <button id="btnPerfilElevacionMismo" class="btn btn-info" style="display:none; margin-left:8px;">
+        <i class="fas fa-mountain"></i> Perfil Elevación
+      </button>
+    </div>
+    <div class="table-container">
+      <table id="tabla-mismo-tipo" style="width:100%;border-radius:12px;overflow:hidden;">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="checkTodosMismo" onclick="toggleSeleccionarTodosMismo(this)"></th>
+            <th>ID A</th>
+            <th>Nombre A</th>
+            <th>Lat A</th>
+            <th>Lon A</th>
+            <th>Lat A (rad)</th>
+            <th>Lon A (rad)</th>
+            <th>ID B</th>
+            <th>Nombre B</th>
+            <th>Lat B</th>
+            <th>Lon B</th>
+            <th>Lat B (rad)</th>
+            <th>Lon B (rad)</th>
+            <th>Distancia (km)</th>
+            <th>Frecuencia (GHz)</th>
+            <th>Disponibilidad</th>
+            <th>Altura Torre A</th>
+            <th>Altura Torre B</th>
+            <th>Altura RAN A</th>
+            <th>Altura RAN B</th>
+            <th>Transporte A</th>
+            <th>Transporte B</th>
+            <th>Arrendamiento A</th>
+            <th>Arrendamiento B</th>
+            <th>On Air A</th>
+            <th>On Air B</th>
+            <th>Tipo Torre A</th>
+            <th>Tipo Torre B</th>
+            <th>Estado A</th>
+            <th>Estado B</th>
+            <th>Factible</th>
+            <th>Antenas</th>
+            <th>Tipo Enlace</th>
+            <th>Análisis</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  enlaces.forEach((enlaceData, idx) => {
+    html += `<tr data-idx="${idx}">`;
+    html += `<td><input type="checkbox" class="check-mismo-transporte" onchange="resaltarFilaMismoTransporte(this)"></td>`;
+    enlaceData.forEach((val, i) => {
+      if (i === enlaceData.length - 1) {
+        html += `<td style="text-align:center;">
+          <button class="btn btn-info btn-sm" style="width: 140px; font-size: 1rem; font-weight:600; display:flex;align-items:center;justify-content:center;gap:8px;"
+            onclick="try{mostrarAnalisisDetallado(JSON.parse(decodeURIComponent(this.dataset.analisis)));}catch(e){alert('No hay análisis detallado disponible.');}" 
+            data-analisis="${encodeURIComponent(val)}">
+            <i class="fas fa-info-circle"></i> Ver Análisis
+          </button>
+        </td>`;
+      } else {
+        html += `<td>${val}</td>`;
+      }
+    });
+    html += `</tr>`;
+  });
+  html += '</tbody></table></div>';
+  contenedor.innerHTML = html;
+
+  // Selección de filas y botón de perfil de elevación
+  const tbody = contenedor.querySelector('tbody');
+  let filaSeleccionada = null;
+  tbody.addEventListener('click', function(e) {
+    const fila = e.target.closest('tr');
+    if (!fila) return;
+    tbody.querySelectorAll('tr').forEach(f => f.classList.remove('selected'));
+    fila.classList.add('selected');
+    filaSeleccionada = fila;
+    document.getElementById('btnPerfilElevacionMismo').style.display = 'inline-block';
+  });
+  document.getElementById('btnPerfilElevacionMismo').onclick = function() {
+    if (!filaSeleccionada) return;
+    const celdas = filaSeleccionada.querySelectorAll('td');
+    const datos = {
+      idA: celdas[1]?.textContent,
+      nombreA: celdas[2]?.textContent,
+      latA: celdas[3]?.textContent,
+      lonA: celdas[4]?.textContent,
+      idB: celdas[7]?.textContent,
+      nombreB: celdas[8]?.textContent,
+      latB: celdas[9]?.textContent,
+      lonB: celdas[10]?.textContent,
+      alturaA: celdas[16]?.textContent,
+      alturaB: celdas[17]?.textContent,
+      frecuencia: celdas[13]?.textContent
+    };
+    mostrarPerfilElevacionDesdeDatos(datos);
+    const perfilDiv = document.getElementById('perfil-elevacion-con-torres');
+    if (perfilDiv) {
+      perfilDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+}
+
+// Resalta la fila seleccionada
+function resaltarFilaMismoTransporte(checkbox) {
+  const fila = checkbox.closest('tr');
+  if (checkbox.checked) {
+    fila.classList.add('selected');
+  } else {
+    fila.classList.remove('selected');
+  }
+  // Habilita o deshabilita el botón de eliminar según selección
+  const algunoSeleccionado = Array.from(document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte')).some(cb => cb.checked);
+  document.getElementById('btnEliminarSeleccionadosMismo').disabled = !algunoSeleccionado;
+}
+function toggleSeleccionarTodosMismo(master) {
+  document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte').forEach(cb => cb.checked = master.checked);
+  document.getElementById('btnEliminarSeleccionadosMismo').disabled = !master.checked;
+}
+
+// Seleccionar todos desde botón
+function seleccionarTodosMismoTransporte() {
+  document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte').forEach(cb => cb.checked = true);
+  document.getElementById('btnEliminarSeleccionadosMismo').disabled = false;
+}
+
+// Eliminar seleccionados
+function eliminarEnlacesSeleccionadosMismo() {
+  if (!confirm('¿Seguro que deseas eliminar los enlaces seleccionados?')) return;
+  // Obtén los índices de los seleccionados
+  const checks = Array.from(document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte'));
+  const enlaces = JSON.parse(localStorage.getItem('enlacesMismoTransporte') || '[]');
+  const nuevos = enlaces.filter((_, idx) => !checks[idx].checked);
+  localStorage.setItem('enlacesMismoTransporte', JSON.stringify(nuevos));
+  mostrarTablaMismoTransporte();
+  document.getElementById('btnEliminarSeleccionadosMismo').disabled = true;
+}
+
+// Exportar a Excel
+function exportarExcelMismoTransporte() {
+  const tabla = document.getElementById('tabla-mismo-tipo');
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(tabla);
+  XLSX.utils.book_append_sheet(wb, ws, "MismoTransporte");
+  XLSX.writeFile(wb, "enlaces_mismo_transporte.xlsx");
+}
+
+// Permite seleccionar todos los checkboxes en la tabla de "Mismo Transporte"
+function toggleSeleccionarTodosMismo(master) {
+  document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte').forEach(cb => cb.checked = master.checked);
+}
+
+
+function crearFilaEnlaceTemporal() {
+  const get = id => document.getElementById(id).value.trim();
+  const latA = parseFloat(get('latA'));
+  const lonA = parseFloat(get('lonA'));
+  const latB = parseFloat(get('latB'));
+  const lonB = parseFloat(get('lonB'));
+  if (!get('idA') || !get('idB')) return null;
+  if (isNaN(latA) || isNaN(lonA) || isNaN(latB) || isNaN(lonB)) return null;
+  const distanciaKm = calcularDistancia(latA, lonA, latB, lonB);
+  const frecuencia = asignarFrecuencia(distanciaKm);
+  const factibilidad = analizarFactibilidad(
+    distanciaKm,
+    get('ArreA'),
+    get('ArreB'),
+    get('TransA'),
+    get('TransB'),
+    get('TorreA'),
+    get('TorreB'),
+    get('OnA'),
+    get('OnB'),
+    window.ultimaFactibilidadLOS
+  );
+  const estadoFactible = (factibilidad.advertencia)
+    ? 'FACTIBLE (Requiere análisis)'
+    : (factibilidad.razon && factibilidad.razon.toUpperCase().includes('NO DISPONIBLE'))
+      ? 'NO DISPONIBLE'
+      : (factibilidad.factible ? 'SÍ' : 'NO');
+
+  const filaDatos = [
+    get('idA'), get('nombreA'), get('latA'), get('lonA'),
+    document.getElementById('latArad').value,
+    document.getElementById('lonArad').value,
+    get('idB'), get('nombreB'), get('latB'), get('lonB'),
+    document.getElementById('latBrad').value,
+    document.getElementById('lonBrad').value,
+    distanciaKm.toFixed(6), frecuencia,
+    document.getElementById('disponibilidadAnual').value,
+    get('alturaA'), get('alturaB'), get('ranA'), get('ranB'),
+    get('TransA'), get('TransB'), get('ArreA'), get('ArreB'),
+    get('OnA'), get('OnB'), get('TorreA'), get('TorreB'),
+    get('EstadoA'), get('EstadoB'),
+    estadoFactible,
+    factibilidad.diametroAntena,
+    factibilidad.tipoEnlace,
+    JSON.stringify(factibilidad)
+  ];
+
+  const fila = document.createElement('tr');
+  const tdCheck = document.createElement('td');
+  const check = document.createElement('input');
+  check.type = 'checkbox';
+  check.className = 'check-enlace';
+  check.onclick = function(e) {
+    e.stopPropagation();
+    actualizarBotonEliminarSeleccionados();
+  };
+  tdCheck.appendChild(check);
+  fila.appendChild(tdCheck);
+
+  filaDatos.forEach((val, i) => {
+    const td = document.createElement('td');
+    if (i === 33) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-info btn-sm';
+      btn.innerHTML = '<i class="fas fa-info-circle"></i> Ver Análisis';
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        try {
+          const analisis = JSON.parse(val);
+          mostrarAnalisisDetallado(analisis);
+        } catch {
+          alert('No hay análisis detallado disponible.');
+        }
+      };
+      td.appendChild(btn);
+      td.dataset.analisis = val;
+    } else {
+      td.textContent = val;
+    }
+    fila.appendChild(td);
+  });
+  aplicarEstiloFactibilidad(fila, factibilidad.factible);
+  return fila;
+}
+function ordenarTablaPorFactibilidad() {
+  guardarEnlacesEnStorage();
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+  setTimeout(() => {
+    if (document.body.contains(loader)) {
+      document.body.removeChild(loader);
+    }
+    alert(`✅ Procesamiento de pares completado (${procesados} enlaces agregados de ${dataPares.length} pares totales)\n❌ Omitidos por IDs vacíos: ${omitidos}`);
+    mostrarPestana('enlaces');
+    if (faltantes.length > 0) {
+      document.getElementById('btnDescargarFaltantes').style.display = 'inline-block';
+      window.paresFaltantes = faltantes;
+    } else {
+      document.getElementById('btnDescargarFaltantes').style.display = 'none';
+    }
+  }, 200); // 200 ms de espera, puedes ajustar si es necesario
+}
+function exportarFactiblesParaPathloss() {
+  // 1. Enlaces de la tabla principal
+  const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
+  // 2. Enlaces de la tabla de mismo transporte
+  const filasMismo = [];
+  const tablaMismo = document.getElementById('tabla-mismo-tipo');
+  if (tablaMismo) {
+    Array.from(tablaMismo.querySelectorAll('tbody tr')).forEach(tr => filasMismo.push(tr));
+  }
+
+  // 3. Unir ambas listas
+  const filas = filasNormales.concat(filasMismo);
+
+  // 4. Filtrar solo los factibles (NO uses .length aquí)
+  const factibles = filas.filter(fila => {
+    const celdas = fila.querySelectorAll('td');
+    const val = celdas[30]?.textContent.trim().toUpperCase();
+    return val === 'SÍ' || val.startsWith('FACTIBLE');
+  });
+
+  if (factibles.length === 0) {
+    alert('No hay enlaces factibles para exportar');
+    return;
+  }
+
+  const encabezado = [
+    'ID A','Nombre A','Latitud A','Longitud A','ID B','Nombre B','Latitud B','Longitud B',
+    'Arrendamiento A','Arrendamiento B','Tipo Torre A','Tipo Torre B','Transporte A','Transporte B',
+    'Distancia (km)','Frecuencia (GHz)','Altura RAN A','Altura RAN B','Altura Torre A','Altura Torre B',
+    'On Air A','On Air B','Antenas'
+  ];
+  const datos = factibles.map(fila => {
+    const c = fila.querySelectorAll('td');
+    return [
+      c[1]?.textContent,   // ID A
+      c[2]?.textContent,   // Nombre A
+      c[3]?.textContent,   // Latitud A
+      c[4]?.textContent,   // Longitud A
+      c[7]?.textContent,   // ID B
+      c[8]?.textContent,   // Nombre B
+      c[9]?.textContent,   // Latitud B
+      c[10]?.textContent,  // Longitud B
+      c[22]?.textContent,  // Arrendamiento A
+      c[23]?.textContent,  // Arrendamiento B
+      c[26]?.textContent,  // Tipo Torre A
+      c[27]?.textContent,  // Tipo Torre B
+      c[20]?.textContent,  // Transporte A
+      c[21]?.textContent,  // Transporte B
+      c[13]?.textContent,  // Distancia (km)
+      c[14]?.textContent,  // Frecuencia (GHz)
+      c[18]?.textContent,  // Altura RAN A
+      c[19]?.textContent,  // Altura RAN B
+      c[16]?.textContent,  // Altura Torre A
+      c[17]?.textContent,  // Altura Torre B
+      c[24]?.textContent,  // On Air A
+      c[25]?.textContent,  // On Air B
+      c[31]?.textContent   // Antenas
+    ].join(';');
+  });
+  const csv = [encabezado.join(';')].concat(datos).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'enlaces_factibles_pathloss.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function mostrarPerfilElevacionDesdeDatos(datos) {
+  const idA = datos.idA || datos['idA'] || '';
+  const nombreA = datos.nombreA || datos['nombreA'] || '';
+  const alturaA = parseFloat(datos.alturaA || datos['Altura Torre A']) || 0;
+  const idB = datos.idB || datos['idB'] || '';
+  const nombreB = datos.nombreB || datos['nombreB'] || '';
+  const alturaB = parseFloat(datos.alturaB || datos['Altura Torre B']) || 0;
+  const latA = parseFloat(datos.latA || datos['Latitud A']);
+  const lonA = parseFloat(datos.lonA || datos['Longitud A']);
+  const latB = parseFloat(datos.latB || datos['Latitud B']);
+  const lonB = parseFloat(datos.lonB || datos['Longitud B']);
+  const frecuenciaGHz = parseFloat(datos.frecuencia || datos['Frecuencia']);
+  const numPuntos = 50;
+  if (
+    isNaN(latA) || isNaN(lonA) || isNaN(latB) || isNaN(lonB) ||
+    isNaN(alturaA) || isNaN(alturaB) || isNaN(frecuenciaGHz)
+  ) {
+    alert('Datos insuficientes para generar el perfil de elevación.');
+    return;
+  }
+  const locations = [];
+  for (let i = 0; i < numPuntos; i++) {
+    const lat = latA + (latB - latA) * (i / (numPuntos - 1));
+    const lon = lonA + (lonB - lonA) * (i / (numPuntos - 1));
+    locations.push(`${lat},${lon}`);
+  }
+  const locationsStr = locations.join('|');
+  const url = `https://api.open-elevation.com/api/v1/lookup?locations=${locationsStr}`;
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (!data.results || !data.results.length) {
+      alert('No se pudo obtener el perfil de elevación.');
+      return;
+    }
+    const elevaciones = data.results.map(r => r.elevation);
+    const distanciaKm = calcularDistancia(latA, lonA, latB, lonB);
+    const h1 = elevaciones[0] + alturaA;
+    const h2 = elevaciones[elevaciones.length - 1] + alturaB;
+    const lineaVista = elevaciones.map((_, i) =>
+      h1 + (h2 - h1) * (i / (numPuntos - 1))
+    );
+    let fresnelSup = [], fresnelInf = [];
+    for (let i = 0; i < numPuntos; i++) {
+      const d1 = distanciaKm * 1000 * (i / (numPuntos - 1));
+      const d2 = distanciaKm * 1000 - d1;
+      const rFresnel = 17.32 * Math.sqrt((d1 * d2) / (frecuenciaGHz * distanciaKm * 1000));
+      fresnelSup.push(lineaVista[i] + 0.6 * rFresnel);
+      fresnelInf.push(lineaVista[i] - 0.6 * rFresnel);
+    }
+    const distancias = elevaciones.map((_, i) => +(distanciaKm * i / (numPuntos - 1)).toFixed(2));
+    const torreA = {
+  x: [0, 0],
+  y: [elevaciones[0], elevaciones[0] + alturaA],
+  name: `Torre A (${alturaA} m)`,
+  mode: 'lines+markers',
+  line: { color: '#00e6ff', width: 6 },
+  marker: { size: 10, color: '#00e6ff' },
+  showlegend: true
+};
+const torreB = {
+  x: [distanciaKm, distanciaKm],
+  y: [elevaciones[elevaciones.length - 1], elevaciones[elevaciones.length - 1] + alturaB],
+  name: `Torre B (${alturaB} m)`,
+  mode: 'lines+markers',
+  line: { color: '#e53935', width: 6 },
+  marker: { size: 10, color: '#e53935' },
+  showlegend: true
+};
+      
+    
+    Plotly.newPlot('perfilElevacionPlotly', [
+      {
+        x: distancias,
+        y: elevaciones,
+        name: 'Terreno',
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: { color: '#764ba2', width: 3 }
+      },
+  torreA,
+  torreB,
+      
+      {
+        x: distancias,
+        y: lineaVista,
+        name: 'Línea de Vista',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#10b981', width: 2, dash: 'dash' }
+      },
+      {
+        x: [...distancias, ...distancias.slice().reverse()],
+        y: [...fresnelSup, ...fresnelInf.slice().reverse()],
+        name: 'Zona Fresnel (60%)',
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'toself',
+        fillcolor: 'rgba(245,158,66,0.18)',
+        line: { color: '#f59e42', width: 1, dash: 'dot' },
+        hoverinfo: 'skip',
+        showlegend: true
+      }
+    ], {
+      title: 'Perfil de Elevación y Zona de Fresnel',
+      xaxis: { title: 'Distancia (km)', zeroline: false },
+      yaxis: { title: 'Altura (msnm)', zeroline: false },
+      legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2 },
+      plot_bgcolor: '#181f2a',
+      paper_bgcolor: '#181f2a',
+      font: { color: '#e0f7fa' },
+      margin: { t: 60, l: 60, r: 30, b: 60 }
+    }, {responsive: true});
+    if (document.getElementById('torreA-id')) {
+      document.getElementById('torreA-id').textContent = idA;
+      document.getElementById('torreA-nombre').textContent = nombreA;
+      document.getElementById('torreA-altura').textContent = alturaA + ' m';
+    }
+    if (document.getElementById('torreB-id')) {
+      document.getElementById('torreB-id').textContent = idB;
+      document.getElementById('torreB-nombre').textContent = nombreB;
+      document.getElementById('torreB-altura').textContent = alturaB + ' m';
+    }
+    let factibilidad = '';
+let color = '';
+if (alturaA > 0 && alturaB > 0) {
+  let obstruido = false;
+  for (let i = 0; i < elevaciones.length; i++) {
+    if (elevaciones[i] > fresnelSup[i]) {
+      obstruido = true;
+      break;
+    }
+  }
+  if (obstruido) {
+    factibilidad = 'NO FACTIBLE';
+    color = '#ef4444';
+  } else {
+    factibilidad = 'FACTIBLE';
+    color = '#10b981';
+  }
+} else {
+  factibilidad = 'REQUIERE ANÁLISIS';
+  color = '#f59e42';
+}
+const indicador = document.getElementById('indicador-factibilidad');
+if (indicador) {
+  indicador.innerHTML = `<span style="color:${color};">${factibilidad}</span>`;
+}
+  } catch (error) {
+    alert('Error al consultar Open-Elevation.');
+  }
+let factorK = 4/3; // Valor típico, permite al usuario cambiarlo
+const R = 6371000 * factorK; // Radio terrestre ajustado
+const bulboCurvatura = (distanciaTotalM * distanciaTotalM) / (8 * R);
+}
+
+function actualizarResumenEnlaces() {
+  // 1. Enlaces de la tabla principal
+  const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
+  // 2. Enlaces de la tabla de mismo transporte
+  const filasMismo = [];
+  const tablaMismo = document.getElementById('tabla-mismo-tipo');
+  if (tablaMismo) {
+    Array.from(tablaMismo.querySelectorAll('tbody tr')).forEach(tr => filasMismo.push(tr));
+  }
+  // 3. Unir ambas listas
+  const filas = filasNormales.concat(filasMismo);
+
+  // 4. Contar totales y factibles
+  const total = filas.length;
+  const factibles = filas.filter(fila => {
+    const celdas = fila.querySelectorAll('td');
+    const val = celdas[30]?.textContent.trim().toUpperCase();
+    return val === 'SÍ' || val.startsWith('FACTIBLE');
+  }).length;
+
+  document.getElementById('resumen-total-enlaces').textContent = total;
+  document.getElementById('resumen-enlaces-factibles').textContent = factibles;
+}
+
+function hookResumenEnlaces() {
+  actualizarResumenEnlaces();
+}
+setInterval(actualizarResumenEnlaces, 1000); 
+function mostrarGraficoResumen() {
+  const total = parseInt(document.getElementById('resumen-total-enlaces').textContent) || 0;
+  const factibles = parseInt(document.getElementById('resumen-enlaces-factibles').textContent) || 0;
+  const noFactibles = total - factibles;
+  const ctx = document.createElement('canvas');
+  ctx.width = 320; ctx.height = 180;
+  const modal = document.createElement('div');
+  modal.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;';
+  const inner = document.createElement('div');
+  inner.style = 'background:#fff;padding:24px 18px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);';
+  inner.appendChild(ctx);
+  const btn = document.createElement('button');
+  btn.textContent = 'Cerrar';
+  btn.className = 'btn btn-danger';
+  btn.style = 'margin-top:12px;';
+  btn.onclick = () => document.body.removeChild(modal);
+  inner.appendChild(btn);
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Factibles', 'No Factibles'],
+      datasets: [{
+        data: [factibles, noFactibles],
+        backgroundColor: ['#10b981', '#ef4444']
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: 'bottom' },
+        title: { display: true, text: 'Resumen de Enlaces' }
+      }
+    }
+  });
+}
+function seleccionarTodosEnlaces() {
+  document.querySelectorAll('#tabla tbody .check-enlace').forEach(cb => cb.checked = true);
+  actualizarBotonEliminarSeleccionados();
+}
+
+function toggleSeleccionarTodos(master) {
+  document.querySelectorAll('#tabla tbody .check-enlace').forEach(cb => cb.checked = master.checked);
+  actualizarBotonEliminarSeleccionados();
+}
+function actualizarBotonEliminarSeleccionados() {
+  const algunoSeleccionado = Array.from(document.querySelectorAll('#tabla tbody .check-enlace')).some(cb => cb.checked);
+  document.getElementById('btnEliminarSeleccionados').disabled = !algunoSeleccionado;
+}
+function eliminarEnlacesSeleccionados() {
+  if (!confirm('¿Seguro que deseas eliminar los enlaces seleccionados?')) return;
+  document.querySelectorAll('#tabla tbody .check-enlace:checked').forEach(cb => {
+    cb.closest('tr').remove();
+  });
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+  guardarEnlacesEnStorage();
+  actualizarBotonEliminarSeleccionados();
+}
+['latA','lonA','latB','lonB','alturaA','alturaB','frecuencia'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', () => {
+      window.ultimaFactibilidadLOS = undefined;
+      document.getElementById('agregarBtn').disabled = true;    });
+  }
+});
+function mostrarMapaEnlaces(estadoFiltro = null) {
+  const divMapa = document.getElementById('mapa-enlaces');
+  if (!divMapa) return;
+  if (window.mapaEnlaces) {
+    window.mapaEnlaces.remove();
+  }
+  const mapa = L.map('mapa-enlaces').setView([23.6345, -102.5528], 5.2);
+  window.mapaEnlaces = mapa;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(mapa);
+
+  // Unir ambas tablas: principal y mismo transporte
+  const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
+  let filasMismo = [];
+  const tablaMismo = document.getElementById('tabla-mismo-tipo');
+  if (tablaMismo) {
+    filasMismo = Array.from(tablaMismo.querySelectorAll('tbody tr'));
+  }
+  const filas = filasNormales.concat(filasMismo);
+
+  // Estados para segmentación
+  const estadosSet = new Set();
+  filas.forEach(fila => {
+    const celdas = fila.querySelectorAll('td');
+    const estadoA = celdas[28]?.textContent.trim() || 'Sin Estado';
+    const estadoB = celdas[29]?.textContent.trim() || 'Sin Estado';
+    estadosSet.add(estadoA);
+    estadosSet.add(estadoB);
+  });
+  const estadosValidos = [
+    "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas", "Chihuahua",
+    "Ciudad de México", "Coahuila", "Colima", "Durango", "Estado de México", "Guanajuato", "Guerrero",
+    "Hidalgo", "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro",
+    "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz",
+    "Yucatán", "Zacatecas"
+  ];
+  const estados = Array.from(estadosSet)
+    .filter(e => e && estadosValidos.includes(e))
+    .sort();
+  const contenedorBtns = document.getElementById('segmentacion-estados');
+  contenedorBtns.innerHTML = '';
+  const btnTodos = document.createElement('button');
+  btnTodos.textContent = 'Todos';
+  btnTodos.className = 'btn btn-secondary';
+  btnTodos.style.fontWeight = estadoFiltro ? 'normal' : 'bold';
+  btnTodos.onclick = () => mostrarMapaEnlaces(null);
+  contenedorBtns.appendChild(btnTodos);
+  estados.forEach(estado => {
+    const btn = document.createElement('button');
+    btn.textContent = estado;
+    btn.className = 'btn btn-info';
+    btn.style.fontWeight = estadoFiltro === estado ? 'bold' : 'normal';
+    btn.onclick = () => mostrarMapaEnlaces(estado);
+    contenedorBtns.appendChild(btn);
+  });
+
+  // Colores para los estados
+  const coloresEstados = [
+    '#10b981', '#ef4444', '#f59e42', '#2196f3', '#e53935', '#8e24aa', '#43a047', '#fb8c00', '#3949ab', '#00897b'
+  ];
+  const estadoColor = {};
+  let colorIndex = 0;
+
+  filas.forEach(fila => {
+    const celdas = fila.querySelectorAll('td');
+    const latA = parseFloat(celdas[3]?.textContent.replace(',', '.'));
+    const lonA = parseFloat(celdas[4]?.textContent.replace(',', '.'));
+    const latB = parseFloat(celdas[9]?.textContent.replace(',', '.'));
+    const lonB = parseFloat(celdas[10]?.textContent.replace(',', '.'));
+    const estadoA = celdas[28]?.textContent.trim() || 'Sin Estado';
+    const estadoB = celdas[29]?.textContent.trim() || 'Sin Estado';
+    const factible = celdas[30]?.textContent.trim().toUpperCase().startsWith('SÍ') || celdas[30]?.textContent.trim().toUpperCase().startsWith('FACTIBLE');
+    const motivo = celdas[33]?.textContent || '';
+    const nombreA = celdas[1]?.textContent || 'A';
+    const nombreB = celdas[7]?.textContent || 'B';
+    if (estadoFiltro && estadoA !== estadoFiltro && estadoB !== estadoFiltro) return;
+    const estadoKey = estadoA + ' - ' + estadoB;
+    if (!estadoColor[estadoKey]) {
+      estadoColor[estadoKey] = coloresEstados[colorIndex % coloresEstados.length];
+      colorIndex++;
+    }
+    const color = estadoColor[estadoKey];
+
+    if (!isNaN(latA) && !isNaN(lonA) && !isNaN(latB) && !isNaN(lonB)) {
+      const poly = L.polyline([[latA, lonA], [latB, lonB]], {
+        color: color,
+        weight: 4,
+        opacity: 0.8
+      }).addTo(mapa);
+
+      poly.on('click', () => {
+        const datos = {};
+        [
+          'idA','nombreA','latA','lonA','latArad','lonArad',
+          'idB','nombreB','latB','lonB','latBrad','lonBrad',
+          'distancia','frecuencia','disponibilidadAnual',
+          'alturaA','alturaB','ranA','ranB','TransA','TransB','ArreA','ArreB',
+          'OnA','OnB','TorreA','TorreB','EstadoA','EstadoB',
+          'factible','antenas','tipoEnlace','motivo'
+        ].forEach((key, idx) => {
+          if (key === 'motivo') {
+            datos[key] = celdas[34]?.textContent || '';
+          } else {
+            datos[key] = celdas[idx+1]?.textContent || '';
+          }
+        });
+        mostrarPanelDetalleEnlace(datos);
+      });
+
+      L.circleMarker([latA, lonA], {radius: 6, color: color, fillColor: '#fff', fillOpacity: 1}).addTo(mapa)
+        .bindTooltip(nombreA);
+      L.circleMarker([latB, lonB], {radius: 6, color: color, fillColor: '#fff', fillOpacity: 1}).addTo(mapa)
+        .bindTooltip(nombreB);
+    }
+  });
+
+  // Opcional: filtra la tabla visual según estado seleccionado
+  const tbody = document.querySelector('#tabla tbody');
+  if (tbody) {
+    Array.from(tbody.querySelectorAll('tr')).forEach(fila => {
+      const celdas = fila.querySelectorAll('td');
+      const estadoA = celdas[28]?.textContent.trim() || '';
+      const estadoB = celdas[29]?.textContent.trim() || '';
+      if (!estadoFiltro || estadoA === estadoFiltro || estadoB === estadoFiltro) {
+        fila.style.display = '';
+      } else {
+        fila.style.display = 'none';
+      }
+    });
+  }
+}
+function mostrarPanelDetalleEnlace(datos) {
+  const panel = document.getElementById('panel-detalle-enlace');
+  const contenido = document.getElementById('detalle-enlace-contenido');
+  let analisisLista = '';
+  try {
+    const detalles = JSON.parse(datos.motivo);
+    if (Array.isArray(detalles) && detalles.length > 0) {
+      analisisLista = '<ul style="margin-top:6px;">' + detalles.map(det => `<li>${det}</li>`).join('') + '</ul>';
+    } else {
+      
+    }
+  } catch {
+    
+  }
+contenido.innerHTML = `
+  <h3 style="margin-top:0;">${datos.nombreA} → ${datos.nombreB}</h3>
+  <b>ID A:</b> ${datos.idA}<br>
+  <b>Nombre A:</b> ${datos.nombreA}<br>
+  <b>Latitud A:</b> ${datos.latA}<br>
+  <b>Longitud A:</b> ${datos.lonA}<br>
+  <b>Altura Torre A:</b> ${datos.alturaA}<br>
+  <b>Tipo Torre A:</b> ${datos.TorreA}<br>
+  <b>Estado A:</b> ${datos.EstadoA}<br>
+  <hr>
+  <b>ID B:</b> ${datos.idB}<br>
+  <b>Nombre B:</b> ${datos.nombreB}<br>
+  <b>Latitud B:</b> ${datos.latB}<br>
+  <b>Longitud B:</b> ${datos.lonB}<br>
+  <b>Altura Torre B:</b> ${datos.alturaB}<br>
+  <b>Tipo Torre B:</b> ${datos.TorreB}<br>
+  <b>Estado B:</b> ${datos.EstadoB}<br>
+  <hr>
+  <button id="btnPerfilFlotante" class="btn btn-info" style="margin-top:10px; float:right; min-width:unset; width:auto; padding:10px 18px;">
+  <i class="fas fa-mountain"></i> Perfil Elevación
+  </button>
+  ${analisisLista}
+`;
+  panel.style.display = 'block';
+  window.ultimoDatosPanelDetalle = datos;
+  setTimeout(() => {
+  const btn = document.getElementById('btnPerfilFlotante');
+  if (btn) {
+    btn.onclick = function() {
+      mostrarPerfilElevacionDesdeDatos(window.ultimoDatosPanelDetalle || {});
+    };
+  }
+}, 100);
+}
+async function mostrarPerfilElevacionFlotante(datos) {
+  const latA = parseFloat(datos['Latitud A'] || datos.latA);
+  const lonA = parseFloat(datos['Longitud A'] || datos.lonA);
+  const latB = parseFloat(datos['Latitud B'] || datos.latB);
+  const lonB = parseFloat(datos['Longitud B'] || datos.lonB);
+  const alturaA = parseFloat(datos['Altura Torre A'] || datos.alturaA) || 0;
+  const alturaB = parseFloat(datos['Altura Torre B'] || datos.alturaB) || 0;
+  const frecuenciaGHz = parseFloat(datos['Frecuencia'] || datos.frecuencia);
+
+  if (
+    isNaN(latA) || isNaN(lonA) || isNaN(latB) || isNaN(lonB) ||
+    isNaN(alturaA) || isNaN(alturaB) || isNaN(frecuenciaGHz)
+  ) {
+    alert('Datos insuficientes para generar el perfil de elevación.');
+    return;
+  }
+
+  const numPuntos = 50;
+  const locations = [];
+  for (let i = 0; i < numPuntos; i++) {
+    const lat = latA + (latB - latA) * (i / (numPuntos - 1));
+    const lon = lonA + (lonB - lonA) * (i / (numPuntos - 1));
+    locations.push(`${lat},${lon}`);
+  }
+  const locationsStr = locations.join('|');
+  const url = `https://api.open-elevation.com/api/v1/lookup?locations=${locationsStr}`;
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (!data.results || !data.results.length) {
+      alert('No se pudo obtener el perfil de elevación.');
+      return;
+    }
+    const elevaciones = data.results.map(r => r.elevation);
+    const distanciaKm = Math.sqrt(
+      Math.pow(latA - latB, 2) + Math.pow(lonA - lonB, 2)
+    ) * 111.32; // Aproximado
+    const h1 = elevaciones[0] + alturaA;
+    const h2 = elevaciones[elevaciones.length - 1] + alturaB;
+    const lineaVista = elevaciones.map((_, i) =>
+      h1 + (h2 - h1) * (i / (numPuntos - 1))
+    );
+    let fresnelSup = [], fresnelInf = [];
+    for (let i = 0; i < numPuntos; i++) {
+      const d1 = distanciaKm * 1000 * (i / (numPuntos - 1));
+      const d2 = distanciaKm * 1000 - d1;
+      const rFresnel = 17.32 * Math.sqrt((d1 * d2) / (frecuenciaGHz * distanciaKm * 1000));
+      fresnelSup.push(lineaVista[i] + 0.6 * rFresnel);
+      fresnelInf.push(lineaVista[i] - 0.6 * rFresnel);
+    }
+    const distancias = elevaciones.map((_, i) => +(distanciaKm * i / (numPuntos - 1)).toFixed(2));
+    Plotly.newPlot('perfilElevacionModalPlotly', [
+      {
+        x: distancias,
+        y: elevaciones,
+        name: 'Terreno',
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: { color: '#764ba2', width: 3 }
+      },
+      {
+        x: distancias,
+        y: lineaVista,
+        name: 'Línea de Vista',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#10b981', width: 2, dash: 'dash' }
+      },
+      {
+        x: [...distancias, ...distancias.slice().reverse()],
+        y: [...fresnelSup, ...fresnelInf.slice().reverse()],
+        name: 'Zona Fresnel (60%)',
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'toself',
+        fillcolor: 'rgba(245,158,66,0.18)',
+        line: { color: '#f59e42', width: 1, dash: 'dot' },
+        hoverinfo: 'skip',
+        showlegend: true
+      }
+    ], {
+      title: 'Perfil de Elevación y Zona de Fresnel',
+      xaxis: { title: 'Distancia (km)', zeroline: false },
+      yaxis: { title: 'Altura (msnm)', zeroline: false },
+      legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2 },
+      plot_bgcolor: '#fff',
+      paper_bgcolor: '#fff',
+      font: { color: '#222' },
+      margin: { t: 60, l: 60, r: 30, b: 60 }
+    }, {responsive: true});
+    document.getElementById('modal-perfil-elevacion').style.display = 'flex';
+  } catch (error) {
+    alert('Error al consultar Open-Elevation.');
+  }
+}
+
+if (document.getElementById('tab-resumen').classList.contains('active')) {
+  mostrarMapaEnlaces(null);
+}
+function abrirPerfilElevacionEnNuevaVentana(datos) {
+  const params = encodeURIComponent(JSON.stringify(datos));
+  window.open(`perfil_elevacion.html?datos=${params}`, '_blank');
+}
+function actualizarBotonPerfilElevacionGlobal() {
+  const fila = document.querySelector('#tabla tbody tr.selected');
+  const btn = document.getElementById('btnPerfilElevacionGlobal');
+  btn.style.display = fila ? 'inline-block' : 'none';
+}
+function guardarEnlacesEnStorageModo(modo) {
+  if (modo === "mismo") {
+    // NO guardar nada aquí, los enlaces de mismo transporte se gestionan solo en localStorage directamente
+    return;
+  }
+  // Normal: guarda los enlaces de la tabla principal
+  const tabla = document.querySelector('#tabla tbody');
+  const filas = tabla.querySelectorAll('tr');
+  const enlaces = [];
+  filas.forEach(fila => {
+    const celdas = fila.querySelectorAll('td');
+    const enlace = [];
+    for (let i = 1; i < celdas.length; i++) {
+      if (i === 33 && celdas[i].querySelector('button') && celdas[i].dataset.analisis) {
+        enlace.push(celdas[i].dataset.analisis);
+      } else {
+        enlace.push(celdas[i].textContent);
+      }
+    }
+    enlaces.push(enlace);
+  });
+  localStorage.setItem('enlacesPtP', JSON.stringify(enlaces));
+}
+
+// Carga enlaces del storage correcto según el modo
+function cargarEnlacesDeStorageModo(modo) {
+  if (modo === "mismo") {
+    mostrarTablaMismoTransporte();
+    return;
+  }
+  const key = 'enlacesPtP';
+  const enlacesGuardados = localStorage.getItem(key);
+  if (!enlacesGuardados) return;
+  const enlaces = JSON.parse(enlacesGuardados);
+  const tbody = document.querySelector('#tabla tbody');
+  tbody.innerHTML = '';
+  enlaces.forEach(enlaceData => {
+    const fila = document.createElement('tr');
+    const tdCheck = document.createElement('td');
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.className = 'check-enlace';
+    check.onclick = function(e) {
+      e.stopPropagation();
+      actualizarBotonEliminarSeleccionados();
+    };
+    tdCheck.appendChild(check);
+    fila.appendChild(tdCheck);
+    enlaceData.forEach((val, i) => {
+      const td = document.createElement('td');
+      if (i === enlaceData.length - 1) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-info btn-sm';
+        btn.innerHTML = '<i class="fas fa-info-circle"></i> Ver Análisis';
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          try {
+            const analisis = JSON.parse(val);
+            mostrarAnalisisDetallado(analisis);
+          } catch {
+            alert('No hay análisis detallado disponible.');
+          }
+        };
+        td.appendChild(btn);
+        td.dataset.analisis = val;
+      } else {
+        td.textContent = val;
+      }
+      fila.appendChild(td);
+    });
+    tbody.appendChild(fila);
+  });
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+}
+</script>
+<div id="modal-analisis" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(30,30,40,0.7); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:18px; max-width:420px; width:90%; margin:auto; box-shadow:0 8px 32px rgba(0,0,0,0.25); padding:32px 24px 24px 24px; position:relative; animation:fadeInUp 0.3s;">
+    <button onclick="cerrarModalAnalisis()" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;"><i class="fas fa-times"></i></button>
+    <div id="modal-analisis-icono" style="font-size:2.5rem; margin-bottom:10px;"></div>
+    <div id="modal-analisis-titulo" style="font-size:1.3rem; font-weight:700; margin-bottom:10px;"></div>
+    <div id="modal-analisis-resumen" style="font-size:1rem; margin-bottom:10px; color:#444;"></div>
+    <ul id="modal-analisis-lista" style="padding-left:20px; margin-bottom:0; color:#333; font-size:0.98rem;"></ul>
+    
+  </div>
+</div>
+<div id="modal-parametros-radio" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(30,30,40,0.7); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:18px; max-width:420px; width:90%; margin:auto; box-shadow:0 8px 32px rgba(0,0,0,0.25); padding:32px 24px 24px 24px; position:relative;">
+    <button onclick="cerrarPanelParametrosRadio()" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;"><i class="fas fa-times"></i></button>
+    <h3>Parámetros de Radioenlace</h3>
+    <div>
+      <label>Potencia TX (dBm): <input type="number" id="potenciaTX" value="20"></label><br>
+      <label>Ganancia Antena A (dBi): <input type="number" id="gananciaA" value="30"></label><br>
+      <label>Ganancia Antena B (dBi): <input type="number" id="gananciaB" value="30"></label><br>
+      <label>Pérdidas (dB): <input type="number" id="perdidas" value="2"></label><br>
+      <label>Frecuencia (GHz): <input type="number" id="frecuenciaRadio" value="15"></label><br>
+      <label>Distancia (km): <input type="number" id="distanciaRadio" value="10"></label><br>
+      <label>Margen de desvanecimiento (dB): <input type="number" id="fadeMargin" value="30"></label><br>
+      <button class="btn btn-success" onclick="calcularParametrosRadio()">Calcular</button>
+    </div>
+    <div id="resultado-parametros-radio" style="margin-top:12px; color:#222;"></div>
+  </div>
+</div>
+<div id="modal-equipos-antenas" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(30,30,40,0.7); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:18px; max-width:420px; width:90%; margin:auto; box-shadow:0 8px 32px rgba(0,0,0,0.25); padding:32px 24px 24px 24px; position:relative;">
+    <button onclick="cerrarPanelEquiposAntenas()" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;"><i class="fas fa-times"></i></button>
+    <h3>Gestión de Equipos y Antenas</h3>
+    <div>
+      <label>Modelo Radio: <input type="text" id="modeloRadio" value="Ej: Ubiquiti AirFiber"></label><br>
+      <label>Modelo Antena: <input type="text" id="modeloAntena" value="Ej: Dish 30dBi"></label><br>
+      <label>Ganancia (dBi): <input type="number" id="gananciaAntena" value="30"></label><br>
+      <button class="btn btn-success" onclick="guardarEquipoAntena()">Guardar</button>
+    </div>
+    <div id="lista-equipos-antenas" style="margin-top:12px; color:#222;"></div>
+  </div>
+</div>
+<script>
+// filepath: c:\Users\EfrénAlexisHernández\OneDrive - FANGIO COM\Escritorio\FangioEnlacesPtP\ptpFangio.html
+if (localStorage.getItem('fangioSesion') === 'activa') {
+  document.getElementById('logoutBtn').style.display = 'flex';
+}
+document.getElementById('logoutBtn').onclick = function() {
+  localStorage.removeItem('fangioSesion');
+  window.location.href = 'login.html';
+};
+</script>
+</body>
+</html>
+           

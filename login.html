@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Fangio</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #081421;
+      color: #e0f7fa;
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .video-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .video-bg video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      filter: blur(8px) brightness(0.6);
+      opacity: 0.85;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .login-main {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 32px;
+    }
+    #login-box {
+      background: #181f2ae6;
+      padding: 36px 32px 28px 32px;
+      border-radius: 28px;
+      box-shadow: 0 0 32px #00e6ff44;
+      min-width: 340px;
+      max-width: 95vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 0;
+    }
+    #login-box img {
+      width: 68px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #00e6ff33;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #login-box h2 {
+      color: #00e6ff;
+      margin: 0 0 2px 0;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-align: center;
+      font-size: 2rem;
+    }
+    #login-box .subtitle {
+      color: #00bcd4;
+      font-size: 1.13rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    #login-box .desc {
+      color: #e0f7fa;
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      background: #162032;
+      border-radius: 8px;
+      border: 1.5px solid #1e88e5;
+      padding: 0 10px;
+    }
+    .input-group i {
+      color: #00e6ff;
+      font-size: 1.2em;
+    }
+    .input-group input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e0f7fa;
+      font-size: 1.08rem;
+      padding: 12px 0;
+    }
+    button {
+      background: linear-gradient(90deg,#00bcd4 60%,#1e88e5 100%);
+      color: #000;
+      font-weight: 700;
+      padding: 13px 0;
+      border-radius: 12px;
+      font-size: 1.13rem;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      box-shadow: 0 2px 12px #00e6ff33;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: linear-gradient(90deg,#1e88e5 60%,#00bcd4 100%);
+    }
+    #login-error {
+      color: #ef4444;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+      background: #fff0f0;
+      border-radius: 8px;
+      padding: 8px 0;
+      margin-top: -10px;
+    }
+    @media (max-width: 600px) {
+      .login-main { padding: 12px; }
+      #login-box { min-width: unset; width: 100%; border-radius: 14px; }
+    }
+    .video-bg {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.video-bg video {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  filter: blur(8px) brightness(0.6);
+  opacity: 0.85;
+  position: absolute;
+  top: 0; left: 0;
+}
+  </style>
+</head>
+<body>
+  <div class="video-bg">
+<div class="video-bg">
+  <video 
+    src="https://dl.dropboxusercontent.com/scl/fi/isjx084d625twlii2vmkd/Proyecto-video.mp4?rlkey=k2dwu1ek0lt5w77whlzq80zes&st=4h4wxyq1"
+    autoplay loop muted playsinline
+    poster="img/video-placeholder.jpg"
+  ></video>
+</div>
+  </div>
+  <div class="login-main">
+    <div id="login-box">
+      <img src="img/logo_empresa.png" alt="Logo Fangio Telecom">
+      <h2>Fangio Telecom</h2>
+      <div class="subtitle">Gestor de Enlaces PtP</div>
+      <div class="desc">Inicia sesión para continuar</div>
+      <form id="login-form" autocomplete="off">
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="login-usuario" placeholder="Usuario" required autofocus>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="login-password" placeholder="Contraseña" required>
+        </div>
+        <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+        <div id="login-error"><i class="fas fa-exclamation-triangle"></i> Usuario o contraseña incorrectos</div>
+      </form>
+    </div>
+  </div>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const usuario = document.getElementById('login-usuario').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (usuario === 'fangio' && password === 'microondas') {
+        localStorage.setItem('fangioSesion', 'activa');
+        window.location.href = 'ptpFangio.html';
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    });
+    // Oculta error al escribir de nuevo
+    ['login-usuario', 'login-password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        document.getElementById('login-error').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>

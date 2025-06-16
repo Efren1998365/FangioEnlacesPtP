@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Perfil de Elevación</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    body { background: #181f2a; color: #e0f7fa; font-family: 'Inter', sans-serif; }
+    #perfilElevacionPlotly { width: 100%; height: 500px; margin: 30px auto; background: #fff; border-radius: 18px; }
+    .info { margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="info" id="info"></div>
+  <div id="perfilElevacionPlotly"></div>
+  <script>
+    function getDatos() {
+      const params = new URLSearchParams(window.location.search);
+      try {
+        return JSON.parse(decodeURIComponent(params.get('datos')));
+      } catch {
+        return {};
+      }
+    }
+ async function mostrarPerfilElevacion(datos) {
+  const latA = parseFloat(datos['Latitud A'] || datos.latA);
+  const lonA = parseFloat(datos['Longitud A'] || datos.lonA);
+  const latB = parseFloat(datos['Latitud B'] || datos.latB);
+  const lonB = parseFloat(datos['Longitud B'] || datos.lonB);
+  const alturaA = parseFloat(datos['Altura Torre A'] || datos.alturaA) || 0;
+  const alturaB = parseFloat(datos['Altura Torre B'] || datos.alturaB) || 0;
+  const frecuenciaGHz = parseFloat(datos['Frecuencia'] || datos.frecuencia);
+
+  if (
+    isNaN(latA) || isNaN(lonA) || isNaN(latB) || isNaN(lonB) ||
+    isNaN(alturaA) || isNaN(alturaB) || isNaN(frecuenciaGHz)
+  ) {
+    document.getElementById('perfilElevacionPlotly').innerHTML = '<div style="color:#e53935;padding:30px;">Datos insuficientes para graficar el perfil.</div>';
+    return;
+  }
+
+  // Genera puntos intermedios
+  const numPuntos = 100;
+  const lats = [], lons = [];
+  for (let i = 0; i <= numPuntos; i++) {
+    lats.push(latA + (latB - latA) * i / numPuntos);
+    lons.push(lonA + (lonB - lonA) * i / numPuntos);
+  }
+
+  // Consulta Open-Elevation
+  const locations = lats.map((lat, i) => `${lat},${lons[i]}`).join('|');
+  let elevaciones = [];
+  try {
+    const resp = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${locations}`);
+    const data = await resp.json();
+    elevaciones = data.results.map(r => r.elevation);
+  } catch {
+    document.getElementById('perfilElevacionPlotly').innerHTML = '<div style="color:#e53935;padding:30px;">Error al consultar Open-Elevation.</div>';
+    return;
+  }
+
+  // Calcula distancias y alturas
+  const R = 6371000;
+  function toRad(x) { return x * Math.PI / 180; }
+  function distancia(lat1, lon1, lat2, lon2) {
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  const totalDist = distancia(latA, lonA, latB, lonB);
+  const distancias = [];
+  for (let i = 0; i <= numPuntos; i++) {
+    distancias.push((totalDist * i / numPuntos) / 1000); // en km
+  }
+
+  // Altura de la línea de visión
+  const alturasLinea = [];
+  for (let i = 0; i <= numPuntos; i++) {
+    alturasLinea.push(
+      elevaciones[i] + alturaA + (alturaB - alturaA) * (i / numPuntos)
+    );
+  }
+
+  // Zona de Fresnel
+  const c = 3e8;
+  const f = frecuenciaGHz * 1e9;
+  const fresnel = [];
+  for (let i = 0; i <= numPuntos; i++) {
+    const d1 = totalDist * i / numPuntos;
+    const d2 = totalDist - d1;
+    const r = Math.sqrt((c * d1 * d2) / (f * totalDist));
+    fresnel.push(alturasLinea[i] - r);
+  }
+
+  // Graficar
+  Plotly.newPlot('perfilElevacionPlotly', [
+    {
+      x: distancias,
+      y: elevaciones,
+      name: 'Terreno',
+      type: 'scatter',
+      line: { color: '#888' }
+    },
+    {
+      x: distancias,
+      y: alturasLinea,
+      name: 'Línea de visión',
+      type: 'scatter',
+      line: { color: '#2196f3', dash: 'dot' }
+    },
+    {
+      x: distancias,
+      y: fresnel,
+      name: '1er Fresnel',
+      type: 'scatter',
+      line: { color: '#00bcd4', dash: 'dash' }
+    }
+  ], {
+    title: 'Perfil de Elevación y Zona de Fresnel',
+    xaxis: { title: 'Distancia (km)', zeroline: false },
+    yaxis: { title: 'Altura (msnm)', zeroline: false },
+    legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2 },
+    plot_bgcolor: '#fff',
+    paper_bgcolor: '#fff',
+    font: { color: '#222' },
+    margin: { t: 60, l: 60, r: 30, b: 60 }
+  }, {responsive: true});
+}
+    const datos = getDatos();
+    document.getElementById('info').innerHTML = `
+      <b>${datos.nombreA || ''} → ${datos.nombreB || ''}</b><br>
+      <b>Distancia:</b> ${datos.distancia || ''} km<br>
+      <b>Frecuencia:</b> ${datos.frecuencia || ''} GHz
+    `;
+    mostrarPerfilElevacion(datos);
+  </script>
+</body>
+</html>
