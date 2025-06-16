@@ -838,7 +838,6 @@ tbody tr {
 </head>
 <body> 
   <script>
-// Redirige a login.html si no hay sesión activa
 if (localStorage.getItem('fangioSesion') !== 'activa') {
   window.location.href = 'login.html';
 }
@@ -878,7 +877,6 @@ function togglePermitirMismoTransporte() {
     btn.classList.remove('btn-outline-info');
     btn.classList.add('btn-info');
     btn.innerHTML = '<i class="fas fa-exchange-alt"></i> Permitir mismo tipo de transporte <i class="fas fa-toggle-on"></i>';
-    // Si la pestaña "Mismo Transporte" está activa, actualiza la tabla
     if (document.getElementById('tab-mismoTransporte').classList.contains('active')) {
       mostrarTablaMismoTransporte();
     }
@@ -891,9 +889,7 @@ function togglePermitirMismoTransporte() {
   
 </script>
 <script>
-// 1. Exportación/Importación Pathloss
 function importarArchivoPathloss() {
-  // Crear input file temporal
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.pl5,.csv';
@@ -904,21 +900,17 @@ function importarArchivoPathloss() {
 
     try {
       if (file.name.endsWith('.csv')) {
-        // Procesar CSV
         const reader = new FileReader();
         reader.onload = function(e) {
           const text = e.target.result;
           const lines = text.split('\n');
-          // Procesar líneas del CSV
           processPathlossCSV(lines);
         };
         reader.readAsText(file);
       } else if (file.name.endsWith('.pl5')) {
-        // Procesar PL5
         const reader = new FileReader();
         reader.onload = function(e) {
           const buffer = e.target.result;
-          // Procesar archivo PL5 
           processPathlossFile(buffer);
         };
         reader.readAsArrayBuffer(file);
@@ -945,18 +937,15 @@ function processPathlossCSV(lines) {
 }
 
 function processPathlossFile(buffer) {
-  // Implementar el procesamiento del archivo PL5
   alert('El formato .pl5 aún no está soportado. Por favor usa archivos CSV.');
 }
 
-// 2. Visualización avanzada del perfil (factor K editable)
 let factorK = 4/3;
 function setFactorK(nuevoK) {
   factorK = parseFloat(nuevoK) || 4/3;
   alert('Nuevo factor K aplicado: ' + factorK);
 }
 
-// 3. Parámetros de radioenlace (cálculo básico)
 function abrirPanelParametrosRadio() {
   document.getElementById('modal-parametros-radio').style.display = 'flex';
 }
@@ -975,7 +964,6 @@ function calcularParametrosRadio() {
     document.getElementById('resultado-parametros-radio').innerHTML = '<span style="color:#ef4444;">Datos incompletos</span>';
     return;
   }
-  // Pérdida espacio libre (dB)
   const Lfs = 92.45 + 20 * Math.log10(distancia) + 20 * Math.log10(frecuencia);
   const pr = pt + ga + gb - Lfs - l;
   document.getElementById('resultado-parametros-radio').innerHTML =
@@ -984,8 +972,6 @@ function calcularParametrosRadio() {
      <b>Margen de desvanecimiento:</b> ${fade} dB<br>
      <b>Margen total:</b> ${(pr - fade).toFixed(2)} dBm`;
 }
-
-// 5. Gestión de equipos y antenas
 let equiposAntenas = [];
 function abrirPanelEquiposAntenas() {
   document.getElementById('modal-equipos-antenas').style.display = 'flex';
@@ -1015,16 +1001,11 @@ function mostrarListaEquiposAntenas() {
     `<li><b>${eq.modeloRadio}</b> - ${eq.modeloAntena} (${eq.ganancia} dBi)</li>`
   ).join('') + '</ul>';
 }
-
-// 4. Visualización geográfica mejorada (ya tienes Leaflet, solo ejemplo de color y tooltip)
 function mostrarMapaEnlaces(estadoFiltro = null) {
-  // ...tu código existente...
-  // Puedes mejorar los tooltips y colores aquí para que se parezca más a Pathloss.
 }
 </script>
 </script>
 <div class="container">
-    <!-- VIDEO PROFESIONAL DEBAJO DEL LOGO -->
    <div class="banner-hero">
 <video 
   src="https://dl.dropboxusercontent.com/scl/fi/isjx084d625twlii2vmkd/Proyecto-video.mp4?rlkey=k2dwu1ek0lt5w77whlzq80zes&st=4h4wxyq1"
@@ -1586,7 +1567,7 @@ function cargarEnlacesDeStorage() {
       fila.appendChild(td);
     });
 
-    tbody.appendChild(fila); // <-- Esta línea es clave
+    tbody.appendChild(fila);
   });
   actualizarContadorEnlaces();
   verificarEnlacesVacios();
@@ -1899,18 +1880,14 @@ function analizarFactibilidad(distanciaKm, arreA, arreB, transA, transB, torreA,
     };
   }
 function analizarEnlaceSatelital() {
-  // Validar que haya datos básicos
   if (!document.getElementById('latA').value || !document.getElementById('latB').value) {
     alert('❌ Debes ingresar al menos las coordenadas de ambos sitios antes de realizar el análisis satelital');
     return;
   }
-
-  // Guardar los valores originales
   const transAOriginal = document.getElementById('TransA').value;
   const transBOriginal = document.getElementById('TransB').value;
 
   try {
-    // Establecer configuración satelital
     document.getElementById('TransA').value = 'Satelite-OA';
     document.getElementById('TransB').value = 'Satelite-OA';
     const mensaje = '🛰️ Analizando enlace en modo Satelital-Satelital...';
@@ -1922,13 +1899,11 @@ function analizarEnlaceSatelital() {
     agregarOActualizarEnlace();
 
   } finally {
-    // Restaurar valores originales (incluso si hay error)
     document.getElementById('TransA').value = transAOriginal;
     document.getElementById('TransB').value = transBOriginal;
   }
 }
 function validarEnlaceSatelital(distanciaKm) {
-  // Validaciones específicas para enlaces satelitales
   if (distanciaKm > 100) {
     return {
       factible: false,
@@ -2218,12 +2193,9 @@ if (transANorm === transBNorm) {
   }
 }else if (transANorm === transBNorm && permitirMismoTransporte) {
   detallesValidacion.push(`✅ Permitiendo mismo tipo de transporte: "${transA}"`);
-  // Continúa con el análisis normal (no retornes aquí)
 }
   const esArrendadaA = esArrendada(arreANorm);
   const esArrendadaB = esArrendada(arreBNorm);
-
-// ...dentro de la función analizarFactibilidadPermisiva, reemplaza el bloque de arrendadas por este:
 
 if (esArrendadaA || esArrendadaB) {
   diametroAntena = calcularDiametroAntena(distanciaKm, true);
@@ -2232,8 +2204,6 @@ if (esArrendadaA || esArrendadaB) {
   detallesValidacion.push(`📍 Torre A: ${esArrendadaA ? 'Arrendada' : 'Propia'}`);
   detallesValidacion.push(`📍 Torre B: ${esArrendadaB ? 'Arrendada' : 'Propia'}`);
   detallesValidacion.push(`📡 Antena asignada: ${diametroAntena} (según distancia)`);
-
-  // EXCEPCIÓN: Si está permitido mismo transporte y ambos extremos son satelitales (Starlink/Satelite-OA), es FACTIBLE sin exigir fibra ni satelital específico
   const esSatA = esSatelital(transANorm);
   const esSatB = esSatelital(transBNorm);
 if (permitirMismoTransporte && esSatA && esSatB) {
@@ -2260,8 +2230,6 @@ if (permitirMismoTransporte && esSatA && esSatB) {
     detalles: detallesValidacion
   };
 }
-
-  // Validación normal si no es el caso especial
   const fibraA = esFibra(transANorm);
   const satelitalB = esSatelital(transBNorm);
 
@@ -2282,7 +2250,7 @@ if (permitirMismoTransporte && esSatA && esSatB) {
     razon = `No factible - Distancia excede el rango permitido para torres arrendadas`;
   } else if (
     (fibraA && satelitalB && validarCapacidadAntena(distanciaKm, diametroAntena, true)) ||
-    (transANorm === transBNorm && validarCapacidadAntena(distanciaKm, diametroAntena, true)) // Permite mismo transporte
+    (transANorm === transBNorm && validarCapacidadAntena(distanciaKm, diametroAntena, true))
   ) {
     detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antena de ${diametroAntena}`);
     factible = true;
@@ -2342,9 +2310,6 @@ if (permitirMismoTransporte && esSatA && esSatB) {
   }
   return true; 
 }
-// Agregar dentro de la función analizarFactibilidad, después de la validación de transporteBNulo
-
-// Verificar si ambos transportes son satelitales
 const satelitalA = esSatelital(transANorm);
 const satelitalB = esSatelital(transBNorm);
 
@@ -2426,7 +2391,6 @@ function analizarFactibilidadPermisiva(distanciaKm, arreA, arreB, transA, transB
       detalles: ['❌ Línea de vista obstruida según perfil de elevación']
     };
   }
-  // Normalización
   const arreANorm = (arreA || '').toLowerCase().trim();
   const arreBNorm = (arreB || '').toLowerCase().trim();
   const transANorm = (transA || '').toLowerCase().trim();
@@ -2643,9 +2607,7 @@ function analizarFactibilidadPermisiva(distanciaKm, arreA, arreB, transA, transB
       detalles: detallesValidacion
     };
   }
-  // --- PERMISIVO: Si ambos transportes son iguales, NO bloquea, solo deja un detalle ---
 if (transANorm === transBNorm) {
-  // Si ambos transportes son iguales y uno es Starlink o Satelite-OA, es factible
   const esStarlinkOA = (t) => t.includes('starlink') || t.includes('satelite-oa') || t.includes('satélite-oa');
   if (esStarlinkOA(transANorm) || esStarlinkOA(transBNorm)) {
     detallesValidacion.push(`✅ Ambos sitios tienen el mismo transporte (${transA}) y al menos uno es Starlink o Satelite-OA. Se considera FACTIBLE.`);
@@ -2658,7 +2620,6 @@ if (transANorm === transBNorm) {
       detalles: detallesValidacion
     };
   }
-  // Si no es Starlink/Satelite-OA, solo deja el warning permisivo
   detallesValidacion.push(`⚠️ Permitiendo mismo tipo de transporte: "${transA}"`);
 }
   const esArrendadaA = esArrendada(arreANorm);
@@ -2671,8 +2632,6 @@ if (transANorm === transBNorm) {
   detallesValidacion.push(`📍 Torre A: ${esArrendadaA ? 'Arrendada' : 'Propia'}`);
   detallesValidacion.push(`📍 Torre B: ${esArrendadaB ? 'Arrendada' : 'Propia'}`);
   detallesValidacion.push(`📡 Antena asignada: ${diametroAntena} (según distancia)`);
-
-  // EXCEPCIÓN: Si está permitido mismo transporte y ambos extremos son satelitales (Starlink/Satelite-OA)
   const esSatA = esSatelital(transANorm);
   const esSatB = esSatelital(transBNorm);
   let omitirValidacionFibra = false;
@@ -2680,8 +2639,6 @@ if (transANorm === transBNorm) {
     detallesValidacion.push('✅ Permitiendo cualquier combinación de transporte satelital en torres arrendadas. No se exige fibra, pero se respeta el límite de distancia y diámetro de antena.');
     omitirValidacionFibra = true;
   }
-
-  // Validación normal si no es el caso especial
   if (!omitirValidacionFibra) {
     const fibraA = esFibra(transANorm);
     const satelitalB = esSatelital(transBNorm);
@@ -2697,8 +2654,6 @@ if (transANorm === transBNorm) {
       detallesValidacion.push('✅ Torre B tiene transporte Satelite-OA');
     }
   }
-
-  // Validación de distancia y diámetro de antena (NO omitir nunca)
   if (diametroAntena === 'No factible') {
   detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede el rango permitido para torres arrendadas (máx: 13.5km)`);
   factible = false;
@@ -2876,13 +2831,10 @@ function agregarOActualizarEnlace() {
     limpiarFormulario();
     return;
   }
-
-  // Si está activo el modo permisivo pero los transportes son diferentes, NO agregues a Mis Enlaces
   if (permitirMismoTransporte) {
     limpiarFormulario();
     return;
   }
-
   // --- Agrega a Mis Enlaces (modo normal) ---
   if (filaEditando) {
     const celdas = filaEditando.querySelectorAll('td');
@@ -3078,23 +3030,18 @@ if (
   window.ultimaFactibilidadLOS = undefined;
 }
   function exportarExcel() {
-  // 1. Obtén filas de la tabla principal
   const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
-  // 2. Obtén filas de la tabla de mismo transporte
   const filasMismo = [];
   const tablaMismo = document.getElementById('tabla-mismo-tipo');
   if (tablaMismo) {
     Array.from(tablaMismo.querySelectorAll('tbody tr')).forEach(tr => filasMismo.push(tr));
   }
-  // 3. Une ambas listas
   const filas = filasNormales.concat(filasMismo);
 
   if (filas.length === 0) {
     alert('No hay enlaces para exportar');
     return;
   }
-
-  // 4. Construye los datos para Excel
   const encabezado = [
     'ID A','Nombre A','Latitud A','Longitud A','Lat A (rad)','Lon A (rad)',
     'ID B','Nombre B','Latitud B','Longitud B','Lat B (rad)','Lon B (rad)',
@@ -3106,12 +3053,9 @@ if (
   ];
   const datos = filas.map(fila => {
     const c = fila.querySelectorAll('td');
-    // 33 columnas, igual que la tabla
     return Array.from({length: 33}, (_, i) => c[i+1]?.textContent || "");
   });
   const wsData = [encabezado].concat(datos);
-
-  // 5. Exporta a Excel
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   XLSX.utils.book_append_sheet(wb, ws, "EnlacesPtP");
@@ -3198,7 +3142,7 @@ function mostrarPestana(pestana, event) {
 }
   if (pestana === 'resumen') mostrarMapaEnlaces(null);
   if (pestana === 'mismoTransporte') {
-    mostrarTablaMismoTransporte(); // <-- asegúrate de que esto está aquí
+    mostrarTablaMismoTransporte();
   }
   actualizarContadorEnlaces();
   verificarEnlacesVacios();
@@ -3267,8 +3211,6 @@ function procesarPares() {
     alert('❌ Error: No hay pares de IDs para procesar');
     return;
   }
-
-  // Loader visual
   let loader = document.createElement('div');
   loader.id = 'loader-procesando';
   loader.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(10,20,40,0.85);color:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;font-size:2rem;font-weight:800;';
@@ -3313,7 +3255,6 @@ function procesarPares() {
           datosTorreB.length === 0 ? 'FALTA B' : ''
         ]);
       }
-      // AUTOCOMPLETAR DIRECTAMENTE, SI NO HAY DATOS, DEJA VACÍO
       document.getElementById('idA').value = idA;
       document.getElementById('nombreA').value = datosTorreA[3] || '';
       document.getElementById('latA').value = datosTorreA[11] || '';
@@ -3337,12 +3278,7 @@ function procesarPares() {
       document.getElementById('OnB').value = datosTorreB[102] || '';
       document.getElementById('TorreB').value = datosTorreB[21] || '';
       document.getElementById('EstadoB').value = datosTorreB[13] || '';
-
-      // Calcula campos dependientes
       actualizarCalculos();
-
-      // Crea la fila temporal (aunque falten datos)
-// ...dentro de procesarLote()...
 const get = id => document.getElementById(id).value.trim();
 const latA = parseFloat(get('latA'));
 const lonA = parseFloat(get('lonA'));
@@ -3396,16 +3332,13 @@ if (transA && transB && transA === transB) {
 } else {
   filasDiferenteTransporte.push(filaDatos);
 }
-
-// ...después del for, al guardar en localStorage:
 if (permitirMismoTransporte) {
-  // Guarda TODOS los enlaces solo en enlacesMismoTransporte
   const todos = filasDiferenteTransporte.concat(filasMismoTransporte);
   localStorage.setItem('enlacesMismoTransporte', JSON.stringify(todos));
-  localStorage.removeItem('enlacesPtP'); // <-- Borra los de "Mis Enlaces"
+  localStorage.removeItem('enlacesPtP'); 
 } else {
   localStorage.setItem('enlacesPtP', JSON.stringify(filasDiferenteTransporte));
-  localStorage.removeItem('enlacesMismoTransporte'); // <-- Borra los de "Mismo Transporte"
+  localStorage.removeItem('enlacesMismoTransporte'); 
 }
       procesados++;
     }
@@ -3459,7 +3392,6 @@ document.getElementById('btnDescargarFaltantes').onclick = function() {
   a.click();
   URL.revokeObjectURL(url);
 };
-// Muestra la tabla de enlaces usando el análisis permisivo
 function mostrarTablaMismoTransporte() {
   const contenedor = document.getElementById('tabla-mismo-transporte');
   if (!contenedor) return;
@@ -3551,8 +3483,6 @@ function mostrarTablaMismoTransporte() {
   });
   html += '</tbody></table></div>';
   contenedor.innerHTML = html;
-
-  // Selección de filas y botón de perfil de elevación
   const tbody = contenedor.querySelector('tbody');
   let filaSeleccionada = null;
   tbody.addEventListener('click', function(e) {
@@ -3586,8 +3516,6 @@ function mostrarTablaMismoTransporte() {
     }
   };
 }
-
-// Resalta la fila seleccionada
 function resaltarFilaMismoTransporte(checkbox) {
   const fila = checkbox.closest('tr');
   if (checkbox.checked) {
@@ -3595,7 +3523,6 @@ function resaltarFilaMismoTransporte(checkbox) {
   } else {
     fila.classList.remove('selected');
   }
-  // Habilita o deshabilita el botón de eliminar según selección
   const algunoSeleccionado = Array.from(document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte')).some(cb => cb.checked);
   document.getElementById('btnEliminarSeleccionadosMismo').disabled = !algunoSeleccionado;
 }
@@ -3603,17 +3530,12 @@ function toggleSeleccionarTodosMismo(master) {
   document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte').forEach(cb => cb.checked = master.checked);
   document.getElementById('btnEliminarSeleccionadosMismo').disabled = !master.checked;
 }
-
-// Seleccionar todos desde botón
 function seleccionarTodosMismoTransporte() {
   document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte').forEach(cb => cb.checked = true);
   document.getElementById('btnEliminarSeleccionadosMismo').disabled = false;
 }
-
-// Eliminar seleccionados
 function eliminarEnlacesSeleccionadosMismo() {
   if (!confirm('¿Seguro que deseas eliminar los enlaces seleccionados?')) return;
-  // Obtén los índices de los seleccionados
   const checks = Array.from(document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte'));
   const enlaces = JSON.parse(localStorage.getItem('enlacesMismoTransporte') || '[]');
   const nuevos = enlaces.filter((_, idx) => !checks[idx].checked);
@@ -3622,7 +3544,6 @@ function eliminarEnlacesSeleccionadosMismo() {
   document.getElementById('btnEliminarSeleccionadosMismo').disabled = true;
 }
 
-// Exportar a Excel
 function exportarExcelMismoTransporte() {
   const tabla = document.getElementById('tabla-mismo-tipo');
   const wb = XLSX.utils.book_new();
@@ -3630,8 +3551,6 @@ function exportarExcelMismoTransporte() {
   XLSX.utils.book_append_sheet(wb, ws, "MismoTransporte");
   XLSX.writeFile(wb, "enlaces_mismo_transporte.xlsx");
 }
-
-// Permite seleccionar todos los checkboxes en la tabla de "Mismo Transporte"
 function toggleSeleccionarTodosMismo(master) {
   document.querySelectorAll('#tabla-mismo-tipo .check-mismo-transporte').forEach(cb => cb.checked = master.checked);
 }
@@ -3737,22 +3656,16 @@ function ordenarTablaPorFactibilidad() {
     } else {
       document.getElementById('btnDescargarFaltantes').style.display = 'none';
     }
-  }, 200); // 200 ms de espera, puedes ajustar si es necesario
+  }, 200);
 }
 function exportarFactiblesParaPathloss() {
-  // 1. Enlaces de la tabla principal
   const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
-  // 2. Enlaces de la tabla de mismo transporte
   const filasMismo = [];
   const tablaMismo = document.getElementById('tabla-mismo-tipo');
   if (tablaMismo) {
     Array.from(tablaMismo.querySelectorAll('tbody tr')).forEach(tr => filasMismo.push(tr));
   }
-
-  // 3. Unir ambas listas
   const filas = filasNormales.concat(filasMismo);
-
-  // 4. Filtrar solo los factibles (NO uses .length aquí)
   const factibles = filas.filter(fila => {
     const celdas = fila.querySelectorAll('td');
     const val = celdas[30]?.textContent.trim().toUpperCase();
@@ -3960,24 +3873,19 @@ if (indicador) {
   } catch (error) {
     alert('Error al consultar Open-Elevation.');
   }
-let factorK = 4/3; // Valor típico, permite al usuario cambiarlo
-const R = 6371000 * factorK; // Radio terrestre ajustado
+let factorK = 4/3; 
+const R = 6371000 * factorK; 
 const bulboCurvatura = (distanciaTotalM * distanciaTotalM) / (8 * R);
 }
 
 function actualizarResumenEnlaces() {
-  // 1. Enlaces de la tabla principal
   const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
-  // 2. Enlaces de la tabla de mismo transporte
   const filasMismo = [];
   const tablaMismo = document.getElementById('tabla-mismo-tipo');
   if (tablaMismo) {
     Array.from(tablaMismo.querySelectorAll('tbody tr')).forEach(tr => filasMismo.push(tr));
   }
-  // 3. Unir ambas listas
   const filas = filasNormales.concat(filasMismo);
-
-  // 4. Contar totales y factibles
   const total = filas.length;
   const factibles = filas.filter(fila => {
     const celdas = fila.querySelectorAll('td');
@@ -4071,8 +3979,6 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(mapa);
-
-  // Unir ambas tablas: principal y mismo transporte
   const filasNormales = Array.from(document.querySelectorAll('#tabla tbody tr'));
   let filasMismo = [];
   const tablaMismo = document.getElementById('tabla-mismo-tipo');
@@ -4080,8 +3986,6 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
     filasMismo = Array.from(tablaMismo.querySelectorAll('tbody tr'));
   }
   const filas = filasNormales.concat(filasMismo);
-
-  // Estados para segmentación
   const estadosSet = new Set();
   filas.forEach(fila => {
     const celdas = fila.querySelectorAll('td');
@@ -4116,8 +4020,6 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
     btn.onclick = () => mostrarMapaEnlaces(estado);
     contenedorBtns.appendChild(btn);
   });
-
-  // Colores para los estados
   const coloresEstados = [
     '#10b981', '#ef4444', '#f59e42', '#2196f3', '#e53935', '#8e24aa', '#43a047', '#fb8c00', '#3949ab', '#00897b'
   ];
@@ -4176,8 +4078,6 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
         .bindTooltip(nombreB);
     }
   });
-
-  // Opcional: filtra la tabla visual según estado seleccionado
   const tbody = document.querySelector('#tabla tbody');
   if (tbody) {
     Array.from(tbody.querySelectorAll('tr')).forEach(fila => {
@@ -4248,7 +4148,6 @@ async function mostrarPerfilElevacionFlotante(datos) {
   const alturaA = parseFloat(datos['Altura Torre A'] || datos.alturaA) || 0;
   const alturaB = parseFloat(datos['Altura Torre B'] || datos.alturaB) || 0;
   const frecuenciaGHz = parseFloat(datos['Frecuencia'] || datos.frecuencia);
-
   if (
     isNaN(latA) || isNaN(lonA) || isNaN(latB) || isNaN(lonB) ||
     isNaN(alturaA) || isNaN(alturaB) || isNaN(frecuenciaGHz)
@@ -4256,7 +4155,6 @@ async function mostrarPerfilElevacionFlotante(datos) {
     alert('Datos insuficientes para generar el perfil de elevación.');
     return;
   }
-
   const numPuntos = 50;
   const locations = [];
   for (let i = 0; i < numPuntos; i++) {
@@ -4351,10 +4249,8 @@ function actualizarBotonPerfilElevacionGlobal() {
 }
 function guardarEnlacesEnStorageModo(modo) {
   if (modo === "mismo") {
-    // NO guardar nada aquí, los enlaces de mismo transporte se gestionan solo en localStorage directamente
     return;
   }
-  // Normal: guarda los enlaces de la tabla principal
   const tabla = document.querySelector('#tabla tbody');
   const filas = tabla.querySelectorAll('tr');
   const enlaces = [];
@@ -4372,8 +4268,6 @@ function guardarEnlacesEnStorageModo(modo) {
   });
   localStorage.setItem('enlacesPtP', JSON.stringify(enlaces));
 }
-
-// Carga enlaces del storage correcto según el modo
 function cargarEnlacesDeStorageModo(modo) {
   if (modo === "mismo") {
     mostrarTablaMismoTransporte();
@@ -4466,7 +4360,6 @@ function cargarEnlacesDeStorageModo(modo) {
   </div>
 </div>
 <script>
-// filepath: c:\Users\EfrénAlexisHernández\OneDrive - FANGIO COM\Escritorio\FangioEnlacesPtP\ptpFangio.html
 if (localStorage.getItem('fangioSesion') === 'activa') {
   document.getElementById('logoutBtn').style.display = 'flex';
 }
@@ -4477,4 +4370,5 @@ document.getElementById('logoutBtn').onclick = function() {
 </script>
 </body>
 </html>
+           
            
