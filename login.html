@@ -153,6 +153,23 @@
   </style>
 </head>
 <body>
+  <!-- Firebase App (core) SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!-- Firebase Auth SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+  // Configuración de tu proyecto Firebase
+ const firebaseConfig = {
+  apiKey: "AIzaSyDCtRzdOEaCYoBu0T2E_tWrNDwFkuRlBa4",
+  authDomain: "fangioenlaces.firebaseapp.com",
+  projectId: "fangioenlaces",
+  storageBucket: "fangioenlaces.firebasestorage.app",
+  messagingSenderId: "6287176943",
+  appId: "1:6287176943:web:abe117333e089d722c571a",
+  measurementId: "G-K5PVP7GJ1D"
+};
+  firebase.initializeApp(firebaseConfig);
+</script>
   <div class="video-bg">
 <div class="video-bg">
   <video 
@@ -182,24 +199,26 @@
       </form>
     </div>
   </div>
-  <script>
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const usuario = document.getElementById('login-usuario').value.trim();
-      const password = document.getElementById('login-password').value;
-      if (usuario === 'fangio' && password === 'microondas') {
-        localStorage.setItem('fangioSesion', 'activa');
-        window.location.href = 'ptpFangio.html';
-      } else {
-        document.getElementById('login-error').style.display = 'block';
-      }
+<script>
+document.getElementById('login-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-usuario').value.trim();
+  const password = document.getElementById('login-password').value;
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => {
+      localStorage.setItem('fangioSesion', 'activa');
+      window.location.href = 'ptpFangio.html';
+    })
+    .catch((error) => {
+      document.getElementById('login-error').style.display = 'block';
     });
-    // Oculta error al escribir de nuevo
-    ['login-usuario', 'login-password'].forEach(id => {
-      document.getElementById(id).addEventListener('input', function() {
-        document.getElementById('login-error').style.display = 'none';
-      });
-    });
-  </script>
+});
+// Oculta error al escribir de nuevo
+['login-usuario', 'login-password'].forEach(id => {
+  document.getElementById(id).addEventListener('input', function() {
+    document.getElementById('login-error').style.display = 'none';
+  });
+});
+</script>
 </body>
 </html>
