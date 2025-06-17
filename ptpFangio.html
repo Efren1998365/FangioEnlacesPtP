@@ -1304,9 +1304,10 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
       <small id="info-archivo-pares" style="color: #666;"></small>
     </div>
     <div style="display: flex; gap: 12px;">
-      <button class="btn btn-primary" onclick="procesarPares()">
-        <i class="fas fa-play"></i> Procesar Pares
-      </button>
+      <button class="btn btn-primary" onclick="procesarParesConWorker()">
+  <i class="fas fa-play"></i> Procesar Pares
+</button>
+<div id="progreso-pares" style="color: #fff; font-size: 1.2em; margin: 10px 0;"></div>
       <button id="borrar-archivo-pares" type="button" class="btn btn-danger btn-sm">
         <i class="fas fa-trash"></i> Eliminar
       </button>
@@ -3274,6 +3275,7 @@ document.getElementById('inputFile').addEventListener('change', (e) => {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     dataExcel = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+     window.dataExcel = dataExcel;
     const archivoInfo = {
       nombre: file.name,
       tamaño: file.size,
@@ -3297,6 +3299,7 @@ document.getElementById('inputFilePairs').addEventListener('change', (e) => {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     dataPares = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    window.dataPares = dataPares; // <-- ¡AGREGA ESTA LÍNEA!
     const archivoInfo = {
       nombre: file.name,
       tamaño: file.size,
@@ -3346,7 +3349,7 @@ function procesarPares() {
   });
 
   let index = 0;
-  const batchSize = 1000;
+  const batchSize = 2000;
   let procesados = 0;
   let omitidos = 0;
   const filasDiferenteTransporte = [];
@@ -4509,7 +4512,81 @@ document.getElementById('toggleThemeBtn').onclick = function() {
 if (localStorage.getItem('fangioTema') === 'claro') {
   document.body.classList.add('modo-claro');
 }
+function procesarParesConWorker() {
+  if (!window.dataExcel?.length || !window.dataPares?.length) {
+    alert('Carga el archivo Excel primero');
+    return;
+  }
+  let loader = document.createElement('div');
+  loader.id = 'loader-procesando';
+  loader.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(10,20,40,0.85);color:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;font-size:2rem;font-weight:800;';
+  loader.innerHTML = `<div><i class="fas fa-cog fa-spin"></i> Procesando pares, por favor espera...<br><span id="progreso-pares" style="font-size:1.3rem;display:block;margin-top:18px;color:#00e6ff;"></span></div>`;
+  document.body.appendChild(loader);
+
+  const worker = new Worker('worker.js');
+
+worker.postMessage({ dataExcel, dataPares });
+
+worker.onmessage = function(e) {
+  const data = e.data;
+  if (data.progreso !== undefined) {
+    // Actualiza el mensaje de progreso
+    document.getElementById('progreso-pares').innerText =
+      `Procesando: ${data.progreso} de ${data.total}`;
+  }
+if (data.terminado) {
+  document.body.removeChild(loader);
+  // Limpia la tabla antes de agregar nuevos
+  document.querySelector('#tabla tbody').innerHTML = '';
+  // Procesa cada resultado
+  data.resultados.forEach(r => {
+    // Construye la fila directamente
+    const fila = document.createElement('tr');
+    const tdCheck = document.createElement('td');
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.className = 'check-enlace';
+    check.onclick = function(e) {
+      e.stopPropagation();
+      actualizarBotonEliminarSeleccionados();
+    };
+    tdCheck.appendChild(check);
+    fila.appendChild(tdCheck);
+
+    // Asume que r.filaDatos es un array con los datos de la fila (ajusta si tu worker envía otro formato)
+    r.filaDatos.forEach((val, i) => {
+      const td = document.createElement('td');
+      if (i === 33) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-info btn-sm';
+        btn.innerHTML = '<i class="fas fa-info-circle"></i> Ver Análisis';
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          try {
+            const analisis = JSON.parse(val);
+            mostrarAnalisisDetallado(analisis);
+          } catch {
+            alert('No hay análisis detallado disponible.');
+          }
+        };
+        td.appendChild(btn);
+        td.dataset.analisis = val;
+      } else {
+        td.textContent = val;
+      }
+      fila.appendChild(td);
+    });
+    document.querySelector('#tabla tbody').appendChild(fila);
+  });
+  alert('¡Procesamiento terminado!');
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+}
+};
+}
+
 </script>
+
 
 </body>
 </html>
