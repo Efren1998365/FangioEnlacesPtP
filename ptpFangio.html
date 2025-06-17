@@ -886,7 +886,69 @@ tbody tr {
   color: #888;
   text-shadow: none;
 }
+button, .tab-button, .btn {
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+button:hover, .tab-button:hover, .btn:hover {
+  transform: translateY(-2px) scale(1.03);
+}
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.95em;
+  font-weight: 700;
+  color: #fff;
+}
+.badge-factible { background: #10b981; }
+.badge-nofactible { background: #ef4444; }
+.badge-indef { background: #f59e42; }
+body.modo-claro {
+  background: #f5f7fa;
+  color: #222;
+}
+body.modo-claro .main-content,
+body.modo-claro .table-container {
+  background: #fff !important;
+  color: #222 !important;
+}
+body.modo-claro .badge-factible { background: #059669; }
+body.modo-claro .badge-nofactible { background: #dc2626; }
+body.modo-claro .badge-indef { background: #f59e42; }
+@media (max-width: 600px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  th, td {
+    padding: 8px 4px;
+    text-align: left;
+  }
+  tr { margin-bottom: 12px; }
+  th { background: #00bcd4; color: #fff; }
+}
+:root {
+  --background: #f4f6fb;
+  --foreground: #1a2236;
+  --primary: #009fe3;
+  --secondary: #f7b32b;
+  --card: #ffffff;
+  --card-shadow: 0 2px 12px rgba(30, 42, 73, 0.08);
+  --button-bg: #009fe3;
+  --button-hover: #007bb8;
+  --button-text: #fff;
+  --input-bg: #f0f4fa;
+  --input-border: #dbeafe;
+}
 
+[data-theme="dark"] {
+  --background: #0a2239;
+  --foreground: #f8fbfd;
+  --primary: #00cfff;
+  --secondary: #eaf8fd;
+  --card: #16213e;
+  --button-bg: #00cfff;
+  --button-text: #0a2239;
+}
   </style>
 </head>
 <body> 
@@ -1074,11 +1136,15 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
         </a>
       </div>
     </div>
+    
   </div>
 </div>
   <div class="fangio-header-decoration"></div>
   
 </div>
+<button id="toggleThemeBtn" class="btn btn-secondary" style="position:fixed;bottom:18px;right:24px;z-index:9999;">
+  <i class="fas fa-adjust"></i> Cambiar tema
+</button>
     <div class="action-buttons">    
 </div>
 <div id="indicador-factibilidad" style="text-align:center; font-size:2rem; font-weight:800; margin-bottom:10px;">
@@ -1366,6 +1432,12 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   </div>
 </div>
       <div id="tab-enlaces" class="tab-content">
+        <button class="btn btn-info" onclick="exportarJSON()">
+  <i class="fas fa-file-code"></i> Exportar JSON
+</button>
+<button class="btn btn-secondary" onclick="importarJSON()">
+  <i class="fas fa-file-import"></i> Importar JSON
+</button>
         <div class="enlaces-counter">
           <i class="fas fa-chart-line"></i> Total de Enlaces Registrados: <span id="total-enlaces">0</span>
         </div>
@@ -1631,29 +1703,26 @@ function cargarEnlacesDeStorage() {
     tdCheck.appendChild(check);
     fila.appendChild(tdCheck);
 
-    enlaceData.forEach((val, i) => {
-      const td = document.createElement('td');
-      if (i === 33) {
-        // Botón Ver Análisis
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-info btn-sm';
-        btn.innerHTML = '<i class="fas fa-info-circle"></i> Ver Análisis';
-        btn.onclick = function(e) {
-          e.stopPropagation();
-          try {
-            const analisis = JSON.parse(val);
-            mostrarAnalisisDetallado(analisis);
-          } catch {
-            alert('No hay análisis detallado disponible.');
-          }
-        };
-        td.appendChild(btn);
-        td.dataset.analisis = val;
-      } else {
-        td.textContent = val;
-      }
-      fila.appendChild(td);
-    });
+enlaceData.forEach((val, i) => {
+  const td = document.createElement('td');
+  if (i === 33) {
+    // ...botón análisis...
+  } else if (i === 30) { // Columna "Factible"
+    let valNorm = val.trim().toUpperCase();
+    let badge = '';
+    if (valNorm.startsWith('SÍ') || valNorm.startsWith('FACTIBLE')) {
+      badge = `<span class="badge badge-factible">Factible</span>`;
+    } else if (valNorm.startsWith('NO')) {
+      badge = `<span class="badge badge-nofactible">No Factible</span>`;
+    } else {
+      badge = `<span class="badge badge-indef">N/D</span>`;
+    }
+    td.innerHTML = badge;
+  } else {
+    td.textContent = val;
+  }
+  fila.appendChild(td);
+});
 
     tbody.appendChild(fila);
   });
@@ -4025,6 +4094,25 @@ function mostrarGraficoResumen() {
     }
   });
 }
+ <canvas id="graficoEstados" width="400" height="180" style="margin:24px auto;display:block;"></canvas>
+const estados = {};
+document.querySelectorAll('#tabla tbody tr').forEach(fila => {
+  const estadoA = fila.querySelectorAll('td')[28]?.textContent.trim() || 'N/D';
+  estados[estadoA] = (estados[estadoA] || 0) + 1;
+});
+const ctxBar = document.getElementById('graficoEstados').getContext('2d');
+new Chart(ctxBar, {
+  type: 'bar',
+  data: {
+    labels: Object.keys(estados),
+    datasets: [{
+      label: 'Enlaces por Estado',
+      data: Object.values(estados),
+      backgroundColor: '#2196f3'
+    }]
+  }
+});
+
 function seleccionarTodosEnlaces() {
   document.querySelectorAll('#tabla tbody .check-enlace').forEach(cb => cb.checked = true);
   actualizarBotonEliminarSeleccionados();
@@ -4455,7 +4543,55 @@ document.getElementById('logoutBtn').onclick = function() {
   localStorage.removeItem('fangioSesion');
   window.location.href = 'login.html';
 };
+document.getElementById('toggleThemeBtn').onclick = function() {
+  document.body.classList.toggle('modo-claro');
+  localStorage.setItem('fangioTema', document.body.classList.contains('modo-claro') ? 'claro' : 'oscuro');
+};
+if (localStorage.getItem('fangioTema') === 'claro') {
+  document.body.classList.add('modo-claro');
+}
+function exportarJSON() {
+  const enlaces = JSON.parse(localStorage.getItem('enlacesPtP') || '[]');
+  const blob = new Blob([JSON.stringify(enlaces, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'enlaces_ptp.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importarJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const enlaces = JSON.parse(e.target.result);
+        localStorage.setItem('enlacesPtP', JSON.stringify(enlaces));
+        cargarEnlacesDeStorage();
+        alert('✅ Datos importados correctamente');
+      } catch {
+        alert('❌ Error al importar JSON');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function showToast(msg, color='#222') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.background = color;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2500);
+}
 </script>
+
+<div id="toast" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:14px 28px;border-radius:18px;z-index:99999;font-weight:700;box-shadow:0 2px 18px #00e6ff55;"></div>
 </body>
 </html>
            
