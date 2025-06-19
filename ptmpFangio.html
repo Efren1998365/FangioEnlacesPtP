@@ -353,12 +353,9 @@
   </style>
 </head>
 <body> 
-  <body>
-
   <button class="btn btn-info" style="margin: 18px;" onclick="window.location.href='ptpFangio.html'">
     <i class="fas fa-random"></i> Estudio Punto a Punto (PtP)
   </button>
-</body>
   <video class="video-bg" src="https://dl.dropboxusercontent.com/scl/fi/isjx084d625twlii2vmkd/Proyecto-video.mp4?rlkey=k2dwu1ek0lt5w77whlzq80zes&st=4h4wxyq1" autoplay loop muted playsinline></video>
   <div class="overlay"></div>
   <div class="torre-lado izq">
@@ -448,7 +445,7 @@
       </div>
       <div>
         <label for="frecuenciaBase">Frecuencia (GHz)</label>
-        <input type="text" id="frecuenciaBase" value="5.8" />
+        <input type="text" id="frecuenciaBase" value="4.9" />
       </div>
     </div>
     <hr style="margin:32px 0;">
@@ -499,6 +496,7 @@
     <th>Distancia (km)</th>
     <th>Factibilidad</th>
     <th>Acción</th>
+    <th>Reporte</th>
   </tr>
 </thead>
   <tbody id="tablaClientesBody"></tbody>
@@ -555,7 +553,6 @@
   </div>
 </div>
       <div id="ptmp-mapa" style="width:100%;height:480px;border-radius:18px;box-shadow:0 2px 24px #00e6ff33;margin-bottom:32px;"></div>
-    </div>
   </div>
   <script>
 window.bases = [];
@@ -654,7 +651,7 @@ function nuevaBase() {
   document.getElementById('alturaBase').value = '';
   document.getElementById('tipoBase').value = 'E5 BSI';
   document.getElementById('transporteBase').value = 'Fibra óptica';
-  document.getElementById('frecuenciaBase').value = '5.8';
+  document.getElementById('frecuenciaBase').value = '4.9';
   window.baseSeleccionada = null;
   renderTablaClientes();
   mostrarMapaPtMP();
@@ -675,14 +672,18 @@ function guardarBase() {
   if (!document.getElementById('tipoBase').value) document.getElementById('tipoBase').value = 'E5 BSI';
   if (!document.getElementById('transporteBase').value) document.getElementById('transporteBase').value = 'Fibra óptica';
   if (!document.getElementById('frecuenciaBase').value) document.getElementById('frecuenciaBase').value = '5.8';
+    const frecuenciaBase = parseFloat(document.getElementById('frecuenciaBase').value);
   const idBase = document.getElementById('idBase').value.trim();
+  if (frecuenciaBase < 4.9 || frecuenciaBase > 6.0) {
+  alert('La frecuencia debe estar entre 4.9 y 6.0 GHz');
+  return;
+}
   const nombreBase = document.getElementById('nombreBase').value.trim();
   const latBase = parseFloat(document.getElementById('latBase').value);
   const lonBase = parseFloat(document.getElementById('lonBase').value);
   const alturaBase = parseFloat(document.getElementById('alturaBase').value);
   const tipoBase = document.getElementById('tipoBase').value.trim();
   const transporteBase = document.getElementById('transporteBase').value.trim();
-  const frecuenciaBase = parseFloat(document.getElementById('frecuenciaBase').value);
 
   if (!idBase || !nombreBase || isNaN(latBase) || isNaN(lonBase) || isNaN(alturaBase)) {
     alert('Completa los datos de la estación base.');
@@ -822,6 +823,9 @@ function renderTablaClientes() {
       <td><span class="${c.badge}">${c.factibilidad}</span></td>
       <td>
         <button class="btn" style="padding:4px 10px;font-size:0.95em;background:#ef4444;color:#fff;" onclick="event.stopPropagation();eliminarCliente(${idx})">Eliminar</button>
+      </td>
+      <td>
+        <button class="btn" style="padding:4px 10px;font-size:0.95em;background:#b4ec51;color:#232933;" onclick="event.stopPropagation();mostrarReporteDetallado(${idx})">Detailed performance report</button>
       </td>
     `;
 
@@ -1307,6 +1311,204 @@ function marcarClienteFactible(idCliente) {
     renderTablaClientes();
   }
 }
+const radios = {
+  "E5-BSI": {
+    txPower: 27,
+    rxGain: 16,
+    sensibilidad: { "BPSK": -93, "QAM256": -71 },
+    throughput: { "BPSK": 10.8, "QAM256": 142.8 }
+  },
+  "E5-ST28": {
+    txPower: 28,
+    rxGain: 28,
+    sensibilidad: { "BPSK": -91, "QAM256": -71 },
+    throughput: { "BPSK": 11, "QAM256": 143.8 }
+  },
+  "E6-ST18": {
+    txPower: 25,
+    rxGain: 18,
+    sensibilidad: { "BPSK": -91, "QAM256": -71 },
+    throughput: { "BPSK": 10.8, "QAM256": 142.8 }
+  }
+};
+function mostrarReporteDetallado(idx) {
+  if (window.baseSeleccionada === null) return;
+  const base = window.bases[window.baseSeleccionada];
+  const cliente = base.clientes[idx];
+  const distancia = cliente.distancia || '--';
+  const frecuenciaGHz = 4.9;
+  const distanciaKm = parseFloat(distancia);
+
+  // --- Especificaciones BASE (E5-BSI) ---
+  const txPowerBaseNominal = 27;      // dBm
+  const gananciaBase = 16;            // dBi
+  const umbralRxBase_BPSK = -93;      // dBm
+  const umbralRxBase_QAM256 = -75;    // dBm (ajusta según tu equipo real)
+
+  // --- Detecta modelo de cliente ---
+  let txPowerClienteNominal = 28, gananciaCliente = 28, modeloCliente = "E5-ST28";
+  let umbralRxCliente_BPSK = -91, umbralRxCliente_QAM256 = -75; // dBm (ajusta QAM256 según tu equipo real)
+  const tipoCliente = (cliente.tipoCliente || "").toUpperCase();
+  if (tipoCliente.includes("E6-ST18")) {
+    txPowerClienteNominal = 25;
+    gananciaCliente = 18;
+    modeloCliente = "E6-ST18";
+    umbralRxCliente_BPSK = -91;
+    umbralRxCliente_QAM256 = -75;
+  }
+
+  // --- Aplica límite profesional de potencia TX ---
+  const TX_POWER_LIMIT = 20; // dBm, igual que la herramienta profesional
+  const txPowerBase = Math.min(txPowerBaseNominal, TX_POWER_LIMIT);
+  const txPowerCliente = Math.min(txPowerClienteNominal, TX_POWER_LIMIT);
+
+  // --- Path Loss profesional ---
+  const frecuenciaMHz = frecuenciaGHz * 1000;
+  const pathLoss = 20 * Math.log10(distanciaKm) + 20 * Math.log10(frecuenciaMHz) + 32.44;
+
+  // --- Base → Cliente ---
+  const rslCliente = txPowerBase + gananciaBase + gananciaCliente - pathLoss;
+  const fadeMarginCliente_BPSK = (rslCliente - umbralRxCliente_BPSK).toFixed(1);
+  const fadeMarginCliente_QAM256 = (rslCliente - umbralRxCliente_QAM256).toFixed(1);
+
+  // --- Cliente → Base ---
+  const rslBase = txPowerCliente + gananciaCliente + gananciaBase - pathLoss;
+  const fadeMarginBase_BPSK = (rslBase - umbralRxBase_BPSK).toFixed(1);
+  const fadeMarginBase_QAM256 = (rslBase - umbralRxBase_QAM256).toFixed(1);
+
+  function getDisponibilidad(fadeMargin) {
+    if (fadeMargin > 30) return { avail: '100.00000', outage: '0.3' };
+    if (fadeMargin > 20) return { avail: '99.99', outage: '52.6' };
+    return { avail: '99.9', outage: '526' };
+  }
+  function getThroughput(fadeMargin) {
+    if (fadeMargin > 30) return { t1: '11', t2: '12.5', tMax1: '143.9', tMax2: '156.7' };
+    if (fadeMargin > 20) return { t1: '8', t2: '10', tMax1: '100', tMax2: '120' };
+    return { t1: '2', t2: '3', tMax1: '20', tMax2: '30' };
+  }
+  // Disponibilidad y throughput para cada modulación y sentido
+  const dispCliente_BPSK = getDisponibilidad(fadeMarginCliente_BPSK);
+  const dispCliente_QAM = getDisponibilidad(fadeMarginCliente_QAM256);
+  const thrCliente_BPSK = getThroughput(fadeMarginCliente_BPSK);
+  const thrCliente_QAM = getThroughput(fadeMarginCliente_QAM256);
+
+  const dispBase_BPSK = getDisponibilidad(fadeMarginBase_BPSK);
+  const dispBase_QAM = getDisponibilidad(fadeMarginBase_QAM256);
+  const thrBase_BPSK = getThroughput(fadeMarginBase_BPSK);
+  const thrBase_QAM = getThroughput(fadeMarginBase_QAM256);
+
+  document.getElementById('contenidoReporteDetallado').innerHTML = `
+    <div style="display:flex;gap:32px;justify-content:space-between;">
+      <div style="flex:1;">
+        <div style="font-size:1.2em;color:#b4ec51;font-weight:700;margin-bottom:8px;">
+          <span style="color:#00e6ff">${base.nombreBase}</span> &rarr; <span style="color:#10b981">${cliente.nombreCliente}</span>
+        </div>
+        <div style="margin-bottom:12px;">
+          Channel Width: 20 MHz &nbsp; | &nbsp; Center Frequency: 4.9 GHz &nbsp; | &nbsp; Link distance: ${distancia} km
+        </div>
+        <div style="background:#232933;padding:18px 12px;border-radius:12px;">
+          <div style="font-weight:700;color:#b4ec51;">MAX AVAILABILITY: BPSK 1/2</div>
+          <div>RSL: ${rslCliente.toFixed(1)} dBm; Fade margin: ${fadeMarginCliente_BPSK} dB; Path loss: ${pathLoss.toFixed(1)} dB</div>
+          <table style="width:100%;margin:10px 0;">
+            <tr>
+              <th>Availability, %</th>
+              <th>Outage, sec/year</th>
+              <th>Unidirectional throughput, Mbps</th>
+              <th>Bidirectional throughput, Mbps</th>
+            </tr>
+            <tr>
+              <td>${dispCliente_BPSK.avail}</td>
+              <td>${dispCliente_BPSK.outage}</td>
+              <td>${thrCliente_BPSK.t1}</td>
+              <td>${thrCliente_BPSK.t2}</td>
+            </tr>
+          </table>
+          <div style="font-weight:700;color:#b4ec51;">MAX THROUGHPUT: QAM256 3/4</div>
+          <div>RSL: ${rslCliente.toFixed(1)} dBm; Fade margin: ${fadeMarginCliente_QAM256} dB; Path loss: ${pathLoss.toFixed(1)} dB</div>
+          <table style="width:100%;margin:10px 0;">
+            <tr>
+              <th>Availability, %</th>
+              <th>Outage, sec/year</th>
+              <th>Unidirectional throughput, Mbps</th>
+              <th>Bidirectional throughput, Mbps</th>
+            </tr>
+            <tr>
+              <td>${dispCliente_QAM.avail}</td>
+              <td>${dispCliente_QAM.outage}</td>
+              <td>${thrCliente_QAM.tMax1}</td>
+              <td>${thrCliente_QAM.tMax2}</td>
+            </tr>
+          </table>
+          <div style="margin-top:10px;font-size:0.95em;color:#b2ebf2;">
+            <b>TX (Base E5-BSI):</b><br>
+            Potencia TX: ${txPowerBase} dBm<br>
+            Ganancia antena TX: 16 dBi<br>
+            <b>RX (${modeloCliente}):</b><br>
+            Ganancia antena RX: ${gananciaCliente} dBi<br>
+            Sensibilidad receptor: BPSK: ${umbralRxCliente_BPSK} dBm / QAM256: ${umbralRxCliente_QAM256} dBm<br>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:1.2em;color:#b4ec51;font-weight:700;margin-bottom:8px;">
+          <span style="color:#10b981">${cliente.nombreCliente}</span> &rarr; <span style="color:#00e6ff">${base.nombreBase}</span>
+        </div>
+        <div style="margin-bottom:12px;">
+          Channel Width: 20 MHz &nbsp; | &nbsp; Center Frequency: 4.9 GHz &nbsp; | &nbsp; Link distance: ${distancia} km
+        </div>
+        <div style="background:#232933;padding:18px 12px;border-radius:12px;">
+          <div style="font-weight:700;color:#b4ec51;">MAX AVAILABILITY: BPSK 1/2</div>
+          <div>RSL: ${rslBase.toFixed(1)} dBm; Fade margin: ${fadeMarginBase_BPSK} dB; Path loss: ${pathLoss.toFixed(1)} dB</div>
+          <table style="width:100%;margin:10px 0;">
+            <tr>
+              <th>Availability, %</th>
+              <th>Outage, sec/year</th>
+              <th>Unidirectional throughput, Mbps</th>
+              <th>Bidirectional throughput, Mbps</th>
+            </tr>
+            <tr>
+              <td>${dispBase_BPSK.avail}</td>
+              <td>${dispBase_BPSK.outage}</td>
+              <td>${thrBase_BPSK.t1}</td>
+              <td>${thrBase_BPSK.t2}</td>
+            </tr>
+          </table>
+          <div style="font-weight:700;color:#b4ec51;">MAX THROUGHPUT: QAM256 3/4</div>
+          <div>RSL: ${rslBase.toFixed(1)} dBm; Fade margin: ${fadeMarginBase_QAM256} dB; Path loss: ${pathLoss.toFixed(1)} dB</div>
+          <table style="width:100%;margin:10px 0;">
+            <tr>
+              <th>Availability, %</th>
+              <th>Outage, sec/year</th>
+              <th>Unidirectional throughput, Mbps</th>
+              <th>Bidirectional throughput, Mbps</th>
+            </tr>
+            <tr>
+              <td>${dispBase_QAM.avail}</td>
+              <td>${dispBase_QAM.outage}</td>
+              <td>${thrBase_QAM.tMax1}</td>
+              <td>${thrBase_QAM.tMax2}</td>
+            </tr>
+          </table>
+          <div style="margin-top:10px;font-size:0.95em;color:#b2ebf2;">
+            <b>TX (${modeloCliente}):</b><br>
+            Potencia TX: ${txPowerCliente} dBm<br>
+            Ganancia antena TX: ${gananciaCliente} dBi<br>
+            <b>RX (Base E5-BSI):</b><br>
+            Ganancia antena RX: 16 dBi<br>
+            Sensibilidad receptor: BPSK: ${umbralRxBase_BPSK} dBm / QAM256: ${umbralRxBase_QAM256} dBm<br>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px;text-align:right;">
+      <button class="btn" onclick="cerrarModalReporteDetallado()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById('modalReporteDetallado').style.display = 'flex';
+}
+function cerrarModalReporteDetallado() {
+  document.getElementById('modalReporteDetallado').style.display = 'none';
+}
 
 </script>
 <div id="modalResultadosPtMP" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(8,20,33,0.92); z-index:99999; align-items:center; justify-content:center;">
@@ -1326,6 +1528,12 @@ function marcarClienteFactible(idCliente) {
     <div id="modalResultadosTabla"></div>
   </div>
 </div> 
+<div id="modalReporteDetallado" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(8,20,33,0.92); z-index:99999; align-items:center; justify-content:center;">
+  <div style="background:#181f2a; border-radius:18px; max-width:900px; width:96vw; margin:40px auto; box-shadow:0 8px 48px #b4ec51aa; padding:32px 24px 24px 24px; position:relative;">
+    <button onclick="cerrarModalReporteDetallado()" style="position:absolute;top:16px;right:18px;font-size:2rem;background:transparent;border:none;color:#b4ec51;cursor:pointer;">&times;</button>
+    <div id="contenidoReporteDetallado"></div>
+  </div>
+</div>
 
 </body>
 </html>
