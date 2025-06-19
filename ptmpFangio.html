@@ -1048,13 +1048,20 @@ for (let i = 0; i < numPuntos; i++) {
   fresnelSup.push(lineaVista[i] + 0.6 * F);
   fresnelInf.push(lineaVista[i] - 0.6 * F);
 }
-    let fresnelObstruido = false;
-    for (let i = 0; i < elevaciones.length; i++) {
-   if (elevaciones[i] > fresnelInf[i] - 1) { // margen de 1 metro
+let fresnelObstruido = false;
+for (let i = 0; i < elevaciones.length; i++) {
+  if (elevaciones[i] > fresnelInf[i] - 1) { // margen de 1 metro
     fresnelObstruido = true;
     break;
   }
+}
+if (datos.idB) {
+  if (fresnelObstruido) {
+    marcarClienteNoFactible(datos.idB);
+  } else {
+    marcarClienteFactible(datos.idB);
   }
+}
     const distancias = elevaciones.map((_, i) => +(distanciaKm * i / (numPuntos - 1)).toFixed(3));
     const torreA = {
       x: [0, 0],
@@ -1275,6 +1282,30 @@ function mostrarModalResultadosPtMP(base, cliente) {
 }
 function cerrarModalResultadosPtMP() {
   document.getElementById('modalResultadosPtMP').style.display = 'none';
+}
+function marcarClienteNoFactible(idCliente) {
+  if (window.baseSeleccionada === null) return;
+  const base = window.bases[window.baseSeleccionada];
+  if (!base || !base.clientes) return;
+  const cliente = base.clientes.find(c => c.idCliente == idCliente);
+  if (cliente) {
+    cliente.factibilidad = 'NO FACTIBLE';
+    cliente.badge = 'badge-nofactible';
+    guardarDatosEnLocalStorage();
+    renderTablaClientes();
+  }
+}
+function marcarClienteFactible(idCliente) {
+  if (window.baseSeleccionada === null) return;
+  const base = window.bases[window.baseSeleccionada];
+  if (!base || !base.clientes) return;
+  const cliente = base.clientes.find(c => c.idCliente == idCliente);
+  if (cliente) {
+    cliente.factibilidad = 'FACTIBLE';
+    cliente.badge = 'badge-factible';
+    guardarDatosEnLocalStorage();
+    renderTablaClientes();
+  }
 }
 
 </script>
