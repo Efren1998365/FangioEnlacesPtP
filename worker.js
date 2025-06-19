@@ -11,6 +11,25 @@ self.onmessage = function(e) {
   let omitidos = 0;
   let resultados = [];
 
+  // Función para calcular distancia (Haversine)
+  function calcularDistancia(lat1, lon1, lat2, lon2) {
+    const rad = x => x * Math.PI / 180;
+    const R = 6371.0088;
+    const φ1 = rad(lat1), φ2 = rad(lat2);
+    const Δφ = rad(lat2 - lat1);
+    const Δλ = rad(lon2 - lon1);
+    const a = Math.sin(Δφ / 2) ** 2 +
+              Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+  function asignarFrecuencia(distanciaKm) {
+    if (isNaN(distanciaKm)) return '';
+    if (distanciaKm <= 5) return '80';
+    if (distanciaKm <= 15) return '15';
+    return '8';
+  }
+
   for (let i = 0; i < dataPares.length; i++) {
     const par = dataPares[i];
     const idA = par[0]?.toString().trim().toUpperCase();
@@ -30,13 +49,27 @@ self.onmessage = function(e) {
       continue;
     }
 
-    // Aquí debes construir el array filaDatos igual que en el HTML
+    // Extrae lat/lon y calcula distancia y frecuencia
+    const latA = parseFloat(datosTorreA[11]) || '';
+    const lonA = parseFloat(datosTorreA[12]) || '';
+    const latB = parseFloat(datosTorreB[11]) || '';
+    const lonB = parseFloat(datosTorreB[12]) || '';
+    const distanciaKm = (latA && lonA && latB && lonB) ? calcularDistancia(latA, lonA, latB, lonB) : '';
+    const frecuencia = distanciaKm ? asignarFrecuencia(distanciaKm) : '';
+
+    // Calcula radianes
+    const rad = x => x * Math.PI / 180;
+    const latArad = latA ? rad(latA).toFixed(6) : '';
+    const lonArad = lonA ? rad(lonA).toFixed(6) : '';
+    const latBrad = latB ? rad(latB).toFixed(6) : '';
+    const lonBrad = lonB ? rad(lonB).toFixed(6) : '';
+
     const filaDatos = [
-      idA, datosTorreA[3] || '', datosTorreA[11] || '', datosTorreA[12] || '',
-      '', '', // latArad, lonArad (puedes calcular si quieres)
-      idB, datosTorreB[3] || '', datosTorreB[11] || '', datosTorreB[12] || '',
-      '', '', // latBrad, lonBrad
-      '', '', // distancia, frecuencia
+      idA, datosTorreA[3] || '', latA, lonA,
+      latArad, lonArad,
+      idB, datosTorreB[3] || '', latB, lonB,
+      latBrad, lonBrad,
+      distanciaKm ? distanciaKm.toFixed(6) : '', frecuencia,
       '', // disponibilidadAnual
       datosTorreA[51] || '', datosTorreB[51] || '', // alturaA, alturaB
       datosTorreA[52] || '', datosTorreB[52] || '', // ranA, ranB
@@ -52,7 +85,7 @@ self.onmessage = function(e) {
       idA, idB,
       datosA: datosTorreA,
       datosB: datosTorreB,
-      filaDatos // <-- ¡Esto es lo que espera tu HTML!
+      filaDatos
     });
     procesados++;
 
