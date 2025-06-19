@@ -4537,6 +4537,7 @@ function procesarParesConWorker() {
 worker.postMessage({ dataExcel, dataPares });
 
 worker.onmessage = function(e) {
+  console.log('Resultados recibidos:', data.resultados.length);
   const data = e.data;
   if (data.progreso !== undefined) {
     // Actualiza el mensaje de progreso
