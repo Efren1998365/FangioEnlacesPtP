@@ -915,7 +915,40 @@ body.modo-claro .table-container {
 body.modo-claro .badge-factible { background: #059669; }
 body.modo-claro .badge-nofactible { background: #dc2626; }
 body.modo-claro .badge-indef { background: #f59e42; }
+@media (max-width: 600px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  th, td {
+    padding: 8px 4px;
+    text-align: left;
+  }
+  tr { margin-bottom: 12px; }
+  th { background: #00bcd4; color: #fff; }
+}
+:root {
+  --background: #f4f6fb;
+  --foreground: #1a2236;
+  --primary: #009fe3;
+  --secondary: #f7b32b;
+  --card: #ffffff;
+  --card-shadow: 0 2px 12px rgba(30, 42, 73, 0.08);
+  --button-bg: #009fe3;
+  --button-hover: #007bb8;
+  --button-text: #fff;
+  --input-bg: #f0f4fa;
+  --input-border: #dbeafe;
+}
 
+[data-theme="dark"] {
+  --background: #0a2239;
+  --foreground: #f8fbfd;
+  --primary: #00cfff;
+  --secondary: #eaf8fd;
+  --card: #16213e;
+  --button-bg: #00cfff;
+  --button-text: #0a2239;
+}
   </style>
 </head>
 <body> 
@@ -1103,6 +1136,7 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
         </a>
       </div>
     </div>
+    
   </div>
 </div>
   <div class="fangio-header-decoration"></div>
@@ -1304,10 +1338,9 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
       <small id="info-archivo-pares" style="color: #666;"></small>
     </div>
     <div style="display: flex; gap: 12px;">
-      <button class="btn btn-primary" onclick="procesarParesConWorker()">
-  <i class="fas fa-play"></i> Procesar Pares
-</button>
-<div id="progreso-pares" style="color: #fff; font-size: 1.2em; margin: 10px 0;"></div>
+      <button class="btn btn-primary" onclick="procesarPares()">
+        <i class="fas fa-play"></i> Procesar Pares
+      </button>
       <button id="borrar-archivo-pares" type="button" class="btn btn-danger btn-sm">
         <i class="fas fa-trash"></i> Eliminar
       </button>
@@ -1399,6 +1432,12 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   </div>
 </div>
       <div id="tab-enlaces" class="tab-content">
+        <button class="btn btn-info" onclick="exportarJSON()">
+  <i class="fas fa-file-code"></i> Exportar JSON
+</button>
+<button class="btn btn-secondary" onclick="importarJSON()">
+  <i class="fas fa-file-import"></i> Importar JSON
+</button>
         <div class="enlaces-counter">
           <i class="fas fa-chart-line"></i> Total de Enlaces Registrados: <span id="total-enlaces">0</span>
         </div>
@@ -3275,7 +3314,6 @@ document.getElementById('inputFile').addEventListener('change', (e) => {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     dataExcel = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-     window.dataExcel = dataExcel;
     const archivoInfo = {
       nombre: file.name,
       tamaño: file.size,
@@ -3299,7 +3337,6 @@ document.getElementById('inputFilePairs').addEventListener('change', (e) => {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     dataPares = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    window.dataPares = dataPares; // <-- ¡AGREGA ESTA LÍNEA!
     const archivoInfo = {
       nombre: file.name,
       tamaño: file.size,
@@ -3349,7 +3386,7 @@ function procesarPares() {
   });
 
   let index = 0;
-  const batchSize = 2000;
+  const batchSize = 1000;
   let procesados = 0;
   let omitidos = 0;
   const filasDiferenteTransporte = [];
@@ -3883,23 +3920,14 @@ async function mostrarPerfilElevacionDesdeDatos(datos) {
     const lineaVista = elevaciones.map((_, i) =>
       h1 + (h2 - h1) * (i / (numPuntos - 1))
     );
-const c = 299792458; // velocidad de la luz (m/s)
-const frecuenciaHz = frecuenciaGHz * 1e9;
-const lambda = c / frecuenciaHz;
-const n = 1; // primera zona de Fresnel
-
-let fresnelSup = [], fresnelInf = [];
-for (let i = 0; i < numPuntos; i++) {
-  const d1 = distanciaKm * 1000 * (i / (numPuntos - 1));
-  const d2 = distanciaKm * 1000 - d1;
-  let F = 0;
-  if (d1 + d2 > 0) {
-    F = Math.sqrt((n * lambda * d1 * d2) / (d1 + d2));
-  }
-  // 60% de la zona de Fresnel
-  fresnelSup.push(lineaVista[i] + 0.6 * F);
-  fresnelInf.push(lineaVista[i] - 0.6 * F);
-}
+    let fresnelSup = [], fresnelInf = [];
+    for (let i = 0; i < numPuntos; i++) {
+      const d1 = distanciaKm * 1000 * (i / (numPuntos - 1));
+      const d2 = distanciaKm * 1000 - d1;
+      const rFresnel = 17.32 * Math.sqrt((d1 * d2) / (frecuenciaGHz * distanciaKm * 1000));
+      fresnelSup.push(lineaVista[i] + 0.6 * rFresnel);
+      fresnelInf.push(lineaVista[i] - 0.6 * rFresnel);
+    }
     const distancias = elevaciones.map((_, i) => +(distanciaKm * i / (numPuntos - 1)).toFixed(2));
     const torreA = {
   x: [0, 0],
@@ -4066,6 +4094,7 @@ function mostrarGraficoResumen() {
     }
   });
 }
+ <canvas id="graficoEstados" width="400" height="180" style="margin:24px auto;display:block;"></canvas>
 const estados = {};
 document.querySelectorAll('#tabla tbody tr').forEach(fila => {
   const estadoA = fila.querySelectorAll('td')[28]?.textContent.trim() || 'N/D';
@@ -4521,82 +4550,48 @@ document.getElementById('toggleThemeBtn').onclick = function() {
 if (localStorage.getItem('fangioTema') === 'claro') {
   document.body.classList.add('modo-claro');
 }
-function procesarParesConWorker() {
-  if (!window.dataExcel?.length || !window.dataPares?.length) {
-    alert('Carga el archivo Excel primero');
-    return;
-  }
-  let loader = document.createElement('div');
-  loader.id = 'loader-procesando';
-  loader.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(10,20,40,0.85);color:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;font-size:2rem;font-weight:800;';
-  loader.innerHTML = `<div><i class="fas fa-cog fa-spin"></i> Procesando pares, por favor espera...<br><span id="progreso-pares" style="font-size:1.3rem;display:block;margin-top:18px;color:#00e6ff;"></span></div>`;
-  document.body.appendChild(loader);
-
-  const worker = new Worker('worker.js');
-
-worker.postMessage({ dataExcel, dataPares });
-worker.onmessage = function(e) {
-  const data = e.data;
-  console.log('Resultados recibidos:', data.resultados.length);
-  if (data.progreso !== undefined) {
-    document.getElementById('progreso-pares').innerText =
-      `Procesados: ${data.progreso} de ${data.total} (${Math.round(100*data.progreso/data.total)}%)`;
-  }
-if (data.terminado) {
-  document.body.removeChild(loader);
-  document.querySelector('#tabla tbody').innerHTML = '';
-
-  // Separa enlaces según el tipo de transporte
-  const enlacesMismoTransporte = [];
-  const enlacesNormales = [];
-  data.resultados.forEach(r => {
-    const transA = (r.filaDatos[20] || '').toLowerCase();
-    const transB = (r.filaDatos[21] || '').toLowerCase();
-    if (permitirMismoTransporte && transA && transB && transA === transB) {
-      enlacesMismoTransporte.push(r.filaDatos);
-    } else {
-      enlacesNormales.push(r.filaDatos);
-    }
-  });
-
-  // Guarda en localStorage según el modo
-  if (permitirMismoTransporte) {
-    localStorage.setItem('enlacesMismoTransporte', JSON.stringify(enlacesMismoTransporte));
-    localStorage.removeItem('enlacesPtP');
-  } else {
-    localStorage.setItem('enlacesPtP', JSON.stringify(enlacesNormales));
-    localStorage.removeItem('enlacesMismoTransporte');
-  }
-
-  // Muestra en la tabla actual
-  const mostrar = permitirMismoTransporte ? enlacesMismoTransporte : enlacesNormales;
-  mostrar.forEach(filaDatos => {
-    const fila = document.createElement('tr');
-    const tdCheck = document.createElement('td');
-    const check = document.createElement('input');
-    check.type = 'checkbox';
-    check.className = 'check-enlace';
-    check.onclick = function(e) { e.stopPropagation(); actualizarBotonEliminarSeleccionados(); };
-    tdCheck.appendChild(check);
-    fila.appendChild(tdCheck);
-    filaDatos.forEach((val, i) => {
-      const td = document.createElement('td');
-      td.textContent = val;
-      fila.appendChild(td);
-    });
-    document.querySelector('#tabla tbody').appendChild(fila);
-  });
-
-  alert('¡Procesamiento terminado!');
-  actualizarContadorEnlaces();
-  verificarEnlacesVacios();
+function exportarJSON() {
+  const enlaces = JSON.parse(localStorage.getItem('enlacesPtP') || '[]');
+  const blob = new Blob([JSON.stringify(enlaces, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'enlaces_ptp.json';
+  a.click();
+  URL.revokeObjectURL(url);
 }
-};
+function importarJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const enlaces = JSON.parse(e.target.result);
+        localStorage.setItem('enlacesPtP', JSON.stringify(enlaces));
+        cargarEnlacesDeStorage();
+        alert('✅ Datos importados correctamente');
+      } catch {
+        alert('❌ Error al importar JSON');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
-
+function showToast(msg, color='#222') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.background = color;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2500);
+}
 </script>
 
-
+<div id="toast" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:14px 28px;border-radius:18px;z-index:99999;font-weight:700;box-shadow:0 2px 18px #00e6ff55;"></div>
 </body>
 </html>
            
