@@ -4542,29 +4542,55 @@ worker.onmessage = function(e) {
     document.getElementById('progreso-pares').innerText =
       `Procesados: ${data.progreso} de ${data.total} (${Math.round(100*data.progreso/data.total)}%)`;
   }
-  if (data.terminado) {
-    document.body.removeChild(loader);
-    document.querySelector('#tabla tbody').innerHTML = '';
-    data.resultados.forEach(r => {
-      const fila = document.createElement('tr');
-      const tdCheck = document.createElement('td');
-      const check = document.createElement('input');
-      check.type = 'checkbox';
-      check.className = 'check-enlace';
-      check.onclick = function(e) { e.stopPropagation(); actualizarBotonEliminarSeleccionados(); };
-      tdCheck.appendChild(check);
-      fila.appendChild(tdCheck);
-      r.filaDatos.forEach((val, i) => {
-        const td = document.createElement('td');
-        td.textContent = val;
-        fila.appendChild(td);
-      });
-      document.querySelector('#tabla tbody').appendChild(fila);
-    });
-    alert('¡Procesamiento terminado!');
-    actualizarContadorEnlaces();
-    verificarEnlacesVacios();
+if (data.terminado) {
+  document.body.removeChild(loader);
+  document.querySelector('#tabla tbody').innerHTML = '';
+
+  // Separa enlaces según el tipo de transporte
+  const enlacesMismoTransporte = [];
+  const enlacesNormales = [];
+  data.resultados.forEach(r => {
+    const transA = (r.filaDatos[20] || '').toLowerCase();
+    const transB = (r.filaDatos[21] || '').toLowerCase();
+    if (permitirMismoTransporte && transA && transB && transA === transB) {
+      enlacesMismoTransporte.push(r.filaDatos);
+    } else {
+      enlacesNormales.push(r.filaDatos);
+    }
+  });
+
+  // Guarda en localStorage según el modo
+  if (permitirMismoTransporte) {
+    localStorage.setItem('enlacesMismoTransporte', JSON.stringify(enlacesMismoTransporte));
+    localStorage.removeItem('enlacesPtP');
+  } else {
+    localStorage.setItem('enlacesPtP', JSON.stringify(enlacesNormales));
+    localStorage.removeItem('enlacesMismoTransporte');
   }
+
+  // Muestra en la tabla actual
+  const mostrar = permitirMismoTransporte ? enlacesMismoTransporte : enlacesNormales;
+  mostrar.forEach(filaDatos => {
+    const fila = document.createElement('tr');
+    const tdCheck = document.createElement('td');
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.className = 'check-enlace';
+    check.onclick = function(e) { e.stopPropagation(); actualizarBotonEliminarSeleccionados(); };
+    tdCheck.appendChild(check);
+    fila.appendChild(tdCheck);
+    filaDatos.forEach((val, i) => {
+      const td = document.createElement('td');
+      td.textContent = val;
+      fila.appendChild(td);
+    });
+    document.querySelector('#tabla tbody').appendChild(fila);
+  });
+
+  alert('¡Procesamiento terminado!');
+  actualizarContadorEnlaces();
+  verificarEnlacesVacios();
+}
 };
 }
 
