@@ -3880,14 +3880,23 @@ async function mostrarPerfilElevacionDesdeDatos(datos) {
     const lineaVista = elevaciones.map((_, i) =>
       h1 + (h2 - h1) * (i / (numPuntos - 1))
     );
-    let fresnelSup = [], fresnelInf = [];
-    for (let i = 0; i < numPuntos; i++) {
-      const d1 = distanciaKm * 1000 * (i / (numPuntos - 1));
-      const d2 = distanciaKm * 1000 - d1;
-      const rFresnel = 17.32 * Math.sqrt((d1 * d2) / (frecuenciaGHz * distanciaKm * 1000));
-      fresnelSup.push(lineaVista[i] + 0.6 * rFresnel);
-      fresnelInf.push(lineaVista[i] - 0.6 * rFresnel);
-    }
+const c = 299792458; // velocidad de la luz (m/s)
+const frecuenciaHz = frecuenciaGHz * 1e9;
+const lambda = c / frecuenciaHz;
+const n = 1; // primera zona de Fresnel
+
+let fresnelSup = [], fresnelInf = [];
+for (let i = 0; i < numPuntos; i++) {
+  const d1 = distanciaKm * 1000 * (i / (numPuntos - 1));
+  const d2 = distanciaKm * 1000 - d1;
+  let F = 0;
+  if (d1 + d2 > 0) {
+    F = Math.sqrt((n * lambda * d1 * d2) / (d1 + d2));
+  }
+  // 60% de la zona de Fresnel
+  fresnelSup.push(lineaVista[i] + 0.6 * F);
+  fresnelInf.push(lineaVista[i] - 0.6 * F);
+}
     const distancias = elevaciones.map((_, i) => +(distanciaKm * i / (numPuntos - 1)).toFixed(2));
     const torreA = {
   x: [0, 0],
