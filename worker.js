@@ -71,6 +71,7 @@ self.onmessage = function(e) {
     // Disponibilidad anual (opcional, puedes dejarlo vacío)
     const disponibilidadAnual = '';
 
+    // Llena todas las columnas (34) igual que el formulario
     const filaDatos = [
       idA, datosTorreA[3] || '', latA, lonA,
       latArad, lonArad,
@@ -85,7 +86,10 @@ self.onmessage = function(e) {
       datosTorreA[102] || '', datosTorreB[102] || '', // OnA, OnB
       datosTorreA[21] || '', datosTorreB[21] || '', // TorreA, TorreB
       datosTorreA[13] || '', datosTorreB[13] || '', // EstadoA, EstadoB
-      '', '', '', '' // factible, antenas, tipoEnlace, análisis
+      '', // Factible
+      '', // Antenas
+      '', // Tipo Enlace
+      ''  // Análisis
     ];
 
     resultados.push({
@@ -100,7 +104,6 @@ self.onmessage = function(e) {
       self.postMessage({ progreso: i, total: dataPares.length });
     }
   }
-console.log('Resultados generados:', resultados.length);
   self.postMessage({
     terminado: true,
     procesados,
