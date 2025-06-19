@@ -29,6 +29,40 @@ self.onmessage = function(e) {
     if (distanciaKm <= 15) return '15';
     return '8';
   }
+  // Lógica simple de factibilidad (puedes mejorarla)
+  function analizarFactibilidad(distanciaKm) {
+    if (!distanciaKm || isNaN(distanciaKm) || distanciaKm <= 0) {
+      return {
+        factible: false,
+        razon: 'No factible - Distancia inválida o cero',
+        diametroAntena: 'N/A',
+        tipoEnlace: 'Error de Datos',
+        detalles: []
+      };
+    }
+    if (distanciaKm > 50) {
+      return {
+        factible: false,
+        razon: 'No factible - Distancia excesiva',
+        diametroAntena: 'N/A',
+        tipoEnlace: 'Fuera de Rango',
+        detalles: []
+      };
+    }
+    let diametroAntena = '';
+    if (distanciaKm <= 3) diametroAntena = '1 pie';
+    else if (distanciaKm <= 5) diametroAntena = '2 pies';
+    else if (distanciaKm <= 10) diametroAntena = '3 pies';
+    else if (distanciaKm <= 17) diametroAntena = '4 pies';
+    else diametroAntena = '6 pies';
+    return {
+      factible: true,
+      razon: 'Factible',
+      diametroAntena,
+      tipoEnlace: 'Normal',
+      detalles: []
+    };
+  }
 
   for (let i = 0; i < dataPares.length; i++) {
     const par = dataPares[i];
@@ -71,7 +105,12 @@ self.onmessage = function(e) {
     // Disponibilidad anual (opcional, puedes dejarlo vacío)
     const disponibilidadAnual = '';
 
-    // Llena todas las columnas (34) igual que el formulario
+    // --- NUEVO: Calcula factibilidad, antenas, tipoEnlace, análisis ---
+    const fact = analizarFactibilidad(distanciaKm);
+    const estadoFactible = (fact.razon && fact.razon.toUpperCase().includes('NO DISPONIBLE'))
+      ? 'NO DISPONIBLE'
+      : (fact.factible ? 'SÍ' : 'NO');
+
     const filaDatos = [
       idA, datosTorreA[3] || '', latA, lonA,
       latArad, lonArad,
@@ -86,10 +125,10 @@ self.onmessage = function(e) {
       datosTorreA[102] || '', datosTorreB[102] || '', // OnA, OnB
       datosTorreA[21] || '', datosTorreB[21] || '', // TorreA, TorreB
       datosTorreA[13] || '', datosTorreB[13] || '', // EstadoA, EstadoB
-      '', // Factible
-      '', // Antenas
-      '', // Tipo Enlace
-      ''  // Análisis
+      estadoFactible, // Factible
+      fact.diametroAntena, // Antenas
+      fact.tipoEnlace, // Tipo Enlace
+      JSON.stringify(fact) // Análisis
     ];
 
     resultados.push({
