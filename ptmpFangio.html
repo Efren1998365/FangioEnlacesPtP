@@ -414,6 +414,7 @@
   </select>
   <button class="btn" onclick="nuevaBase()">Nueva Base</button>
   <button class="btn" onclick="guardarBase()">Guardar Base</button>
+  <button class="btn" onclick="eliminarBase()">Eliminar Base</button>
 </div>
     <h3>Datos de la Estación Base</h3>
     <div class="form-grid">
@@ -486,19 +487,20 @@
     <hr style="margin:32px 0;">
     <h3>Clientes Registrados</h3>
 <table id="tablaClientes">
-  <thead>
-    <tr>
-      <th>ID Cliente</th>
-      <th>Nombre</th>
-      <th>Latitud</th>
-      <th>Longitud</th>
-      <th>Altura</th>
-      <th>Tipo Torre</th>
-      <th>Transporte</th>
-      <th>Distancia (km)</th>
-      <th>Factibilidad</th>
-    </tr>
-  </thead>
+<thead>
+  <tr>
+    <th>ID Cliente</th>
+    <th>Nombre</th>
+    <th>Latitud</th>
+    <th>Longitud</th>
+    <th>Altura</th>
+    <th>Tipo Torre</th>
+    <th>Transporte</th>
+    <th>Distancia (km)</th>
+    <th>Factibilidad</th>
+    <th>Acción</th>
+  </tr>
+</thead>
   <tbody id="tablaClientesBody"></tbody>
 </table>
   </div>
@@ -571,6 +573,21 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+function eliminarBase() {
+  if (window.baseSeleccionada === null || !window.bases[window.baseSeleccionada]) {
+    alert('Selecciona una base para eliminar.');
+    return;
+  }
+  if (!confirm('¿Seguro que deseas eliminar esta base y todos sus clientes?')) return;
+  window.bases.splice(window.baseSeleccionada, 1);
+  window.baseSeleccionada = null;
+  guardarDatosEnLocalStorage();
+  actualizarSelectorBases();
+  renderTablaClientes();
+  mostrarMapaPtMP();
+  nuevaBase();
+}
+
 function analizarFactibilidadPtMP(distanciaKm, alturaBase, alturaCliente, tipoBase, tipoCliente, fresnelObstruido, margenDespejeMetros = 1) {
   if (isNaN(distanciaKm) || distanciaKm <= 0) {
     return { estado: 'N/D', badge: 'badge-indef', motivo: 'Datos insuficientes' };
@@ -803,6 +820,9 @@ function renderTablaClientes() {
       <td>${c.transporteCliente}</td>
       <td>${c.distancia}</td>
       <td><span class="${c.badge}">${c.factibilidad}</span></td>
+      <td>
+        <button class="btn" style="padding:4px 10px;font-size:0.95em;background:#ef4444;color:#fff;" onclick="event.stopPropagation();eliminarCliente(${idx})">Eliminar</button>
+      </td>
     `;
 
     fila.style.cursor = 'pointer';
@@ -826,6 +846,14 @@ function renderTablaClientes() {
 
     tbody.appendChild(fila);
   });
+}
+function eliminarCliente(idx) {
+  if (window.baseSeleccionada === null) return;
+  if (!confirm('¿Seguro que deseas eliminar este cliente?')) return;
+  window.bases[window.baseSeleccionada].clientes.splice(idx, 1);
+  guardarDatosEnLocalStorage();
+  renderTablaClientes();
+  mostrarMapaPtMP();
 }
 
 // Mapa
