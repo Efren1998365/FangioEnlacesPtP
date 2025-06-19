@@ -353,17 +353,12 @@
   </style>
 </head>
 <body> 
-  <button
-  class="btn btn-info"
-  style="margin: 18px; transition: background 0.2s, transform 0.2s;"
-  onclick="window.location.href='ptpFangio.html'"
-  title="Regresar al Estudio Punto a Punto (PtP)"
-  onmouseover="this.style.background='#17a2b8'; this.style.transform='scale(1.07)';"
-  onmouseout="this.style.background=''; this.style.transform='';"
->
-  <i class="fas fa-arrow-left"></i>
-  Regresar a Estudio PtP
-</button>
+  <body>
+
+  <button class="btn btn-info" style="margin: 18px;" onclick="window.location.href='ptpFangio.html'">
+    <i class="fas fa-random"></i> Estudio Punto a Punto (PtP)
+  </button>
+</body>
   <video class="video-bg" src="https://dl.dropboxusercontent.com/scl/fi/isjx084d625twlii2vmkd/Proyecto-video.mp4?rlkey=k2dwu1ek0lt5w77whlzq80zes&st=4h4wxyq1" autoplay loop muted playsinline></video>
   <div class="overlay"></div>
   <div class="torre-lado izq">
@@ -412,6 +407,14 @@
       <div class="titulo">Fangio Telecom</div>
       <div class="subtitulo">Base de datos de Enlaces Punto a Multipunto (PtMP)</div>
     </div>
+    <div style="margin-bottom: 18px;">
+  <label for="selectorBase" style="font-weight:600;color:#00bcd4;">Selecciona Base:</label>
+  <select id="selectorBase" onchange="cambiarBase()" style="margin:0 12px 12px 8px;padding:6px 12px;border-radius:8px;">
+    <option value="">-- Nueva Base --</option>
+  </select>
+  <button class="btn" onclick="nuevaBase()">Nueva Base</button>
+  <button class="btn" onclick="guardarBase()">Guardar Base</button>
+</div>
     <h3>Datos de la Estación Base</h3>
     <div class="form-grid">
       <div>
@@ -677,7 +680,9 @@ function guardarBase() {
     });
     idx = window.bases.length - 1;
   } else {
-    Object.assign(window.bases[idx], { nombreBase, latBase, lonBase, alturaBase, tipoBase, transporteBase, frecuenciaBase });
+    // Mantén los clientes existentes
+    const clientes = window.bases[idx].clientes || [];
+    window.bases[idx] = { idBase, nombreBase, latBase, lonBase, alturaBase, tipoBase, transporteBase, frecuenciaBase, clientes };
   }
   window.baseSeleccionada = idx;
   actualizarSelectorBases();
@@ -709,9 +714,9 @@ function cambiarBase() {
 
 
 function agregarCliente() {
-  if (window.baseSeleccionada === null) {
+  if (window.baseSeleccionada === null || window.baseSeleccionada === undefined || !window.bases[window.baseSeleccionada]) {
     guardarBase();
-    if (window.baseSeleccionada === null) return;
+    if (window.baseSeleccionada === null || window.baseSeleccionada === undefined || !window.bases[window.baseSeleccionada]) return;
   }
   const base = window.bases[window.baseSeleccionada];
   const idCliente = document.getElementById('idCliente').value.trim();
@@ -726,6 +731,17 @@ function agregarCliente() {
     return;
   }
   const distancia = calcularDistancia(base.latBase, base.lonBase, latCliente, lonCliente);
+
+  // Calcula factibilidad
+  const fact = analizarFactibilidadPtMP(
+    distancia,
+    base.alturaBase,
+    alturaCliente,
+    base.tipoBase,
+    tipoCliente,
+    false // No sabemos si hay obstrucción aquí, solo para tabla
+  );
+
   base.clientes.push({
     idCliente,
     nombreCliente,
@@ -735,9 +751,11 @@ function agregarCliente() {
     tipoCliente,
     transporteCliente,
     distancia: distancia.toFixed(2),
-    factibilidad: 'N/D',
-    badge: 'badge-indef'
+    factibilidad: fact.estado,
+    badge: fact.badge
   });
+
+  guardarDatosEnLocalStorage();
   renderTablaClientes();
   mostrarMapaPtMP();
   limpiarClienteConDefault();
@@ -755,7 +773,6 @@ const iconCliente = L.divIcon({
   iconAnchor: [16, 16]
 });
 
-// Tabla de clientes
 function renderTablaClientes() {
   const tbody = document.getElementById('tablaClientes').querySelector('tbody');
   if (!tbody) return;
@@ -767,8 +784,6 @@ function renderTablaClientes() {
 
   base.clientes.forEach((c, idx) => {
     const fila = document.createElement('tr');
-
-    // Badge visual para E6-ST18
     let badgeHTML = '';
     if ((c.tipoCliente || '').toUpperCase() === 'E6-ST18') {
       badgeHTML = `<span style="background:#00e6ff;color:#181f2a;font-size:0.85em;padding:2px 8px;border-radius:8px;margin-left:6px;font-weight:700;">E6-ST18</span>`;
@@ -776,7 +791,11 @@ function renderTablaClientes() {
 
     fila.innerHTML = `
       <td>${c.idCliente}</td>
-      <td>${c.nombreCliente} ${badgeHTML}</td>
+      <td>
+        <span style="cursor:pointer;color:#00e6ff;text-decoration:underline;" onclick="event.stopPropagation();mostrarModalResultadosPtMP(window.bases[window.baseSeleccionada], window.bases[window.baseSeleccionada].clientes[${idx}])">
+          ${c.nombreCliente}
+        </span> ${badgeHTML}
+      </td>
       <td>${c.latCliente}</td>
       <td>${c.lonCliente}</td>
       <td>${c.alturaCliente}</td>
@@ -1184,9 +1203,70 @@ window.onload = function() {
   mostrarMapaPtMP();
   limpiarClienteConDefault();
 };
+function mostrarModalResultadosPtMP(base, cliente) {
+  // Info base
+  document.getElementById('modalBaseInfo').innerHTML = `
+    <b>${base.nombreBase}</b> (${base.idBase})<br>
+    Lat: ${base.latBase} | Lon: ${base.lonBase}<br>
+    Altura: ${base.alturaBase} m<br>
+    Tipo: ${base.tipoBase}<br>
+    Transporte: ${base.transporteBase}<br>
+    Frecuencia: ${base.frecuenciaBase} GHz
+  `;
+  // Info cliente
+  document.getElementById('modalClienteInfo').innerHTML = `
+    <b>${cliente.nombreCliente}</b> (${cliente.idCliente})<br>
+    Lat: ${cliente.latCliente} | Lon: ${cliente.lonCliente}<br>
+    Altura: ${cliente.alturaCliente} m<br>
+    Tipo: ${cliente.tipoCliente}<br>
+    Transporte: ${cliente.transporteCliente}
+  `;
+  // Resultados técnicos (puedes calcularlos o traerlos de tu análisis)
+  document.getElementById('modalResultadosTabla').innerHTML = `
+    <table style="width:100%;background:#101a2a;color:#e0f7fa;border-radius:12px;overflow:hidden;">
+      <tr>
+        <th>Distancia (km)</th>
+        <th>Disponibilidad (%)</th>
+        <th>Margen (dB)</th>
+        <th>RSL (dBm)</th>
+        <th>Tipo Enlace</th>
+      </tr>
+      <tr>
+        <td>${cliente.distancia || '--'}</td>
+        <td>100.00</td>
+        <td>45.0</td>
+        <td>-44.5</td>
+        <td>${cliente.tipoCliente || '--'}</td>
+      </tr>
+    </table>
+    <div style="margin-top:18px;">
+      <button class="btn" onclick="cerrarModalResultadosPtMP()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById('modalResultadosPtMP').style.display = 'flex';
+}
+function cerrarModalResultadosPtMP() {
+  document.getElementById('modalResultadosPtMP').style.display = 'none';
+}
 
 </script>
-  
+<div id="modalResultadosPtMP" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(8,20,33,0.92); z-index:99999; align-items:center; justify-content:center;">
+  <div style="background:#181f2a; border-radius:18px; max-width:900px; width:96vw; margin:40px auto; box-shadow:0 8px 48px #00e6ff99; padding:32px 24px 24px 24px; position:relative;">
+    <button onclick="cerrarModalResultadosPtMP()" style="position:absolute;top:16px;right:18px;font-size:2rem;background:transparent;border:none;color:#00e6ff;cursor:pointer;">&times;</button>
+    <div style="display:flex; gap:32px; justify-content:space-between; align-items:flex-start;">
+      <div style="flex:1;">
+        <h3 style="color:#00e6ff; margin-bottom:8px;">Estación Base</h3>
+        <div id="modalBaseInfo"></div>
+      </div>
+      <div style="flex:1;">
+        <h3 style="color:#10b981; margin-bottom:8px;">Cliente</h3>
+        <div id="modalClienteInfo"></div>
+      </div>
+    </div>
+    <hr style="margin:24px 0;">
+    <div id="modalResultadosTabla"></div>
+  </div>
+</div> 
 
 </body>
 </html>
