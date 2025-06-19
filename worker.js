@@ -64,9 +64,9 @@ self.onmessage = function(e) {
     const latBrad = latB ? rad(latB).toFixed(6) : '';
     const lonBrad = lonB ? rad(lonB).toFixed(6) : '';
 
-    // Alturas
-    const alturaA = datosTorreA[51] || '';
-    const alturaB = datosTorreB[51] || '';
+    // Alturas (usa 30 si está vacío)
+    const alturaA = datosTorreA[51] ? parseFloat(datosTorreA[51]) : 30;
+    const alturaB = datosTorreB[51] ? parseFloat(datosTorreB[51]) : 30;
 
     // Disponibilidad anual (opcional, puedes dejarlo vacío)
     const disponibilidadAnual = '';
@@ -100,7 +100,7 @@ self.onmessage = function(e) {
       self.postMessage({ progreso: i, total: dataPares.length });
     }
   }
-
+console.log('Resultados generados:', resultados.length);
   self.postMessage({
     terminado: true,
     procesados,
