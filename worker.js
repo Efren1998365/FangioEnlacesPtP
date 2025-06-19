@@ -64,14 +64,21 @@ self.onmessage = function(e) {
     const latBrad = latB ? rad(latB).toFixed(6) : '';
     const lonBrad = lonB ? rad(lonB).toFixed(6) : '';
 
+    // Alturas
+    const alturaA = datosTorreA[51] || '';
+    const alturaB = datosTorreB[51] || '';
+
+    // Disponibilidad anual (opcional, puedes dejarlo vacío)
+    const disponibilidadAnual = '';
+
     const filaDatos = [
       idA, datosTorreA[3] || '', latA, lonA,
       latArad, lonArad,
       idB, datosTorreB[3] || '', latB, lonB,
       latBrad, lonBrad,
       distanciaKm ? distanciaKm.toFixed(6) : '', frecuencia,
-      '', // disponibilidadAnual
-      datosTorreA[51] || '', datosTorreB[51] || '', // alturaA, alturaB
+      disponibilidadAnual,
+      alturaA, alturaB,
       datosTorreA[52] || '', datosTorreB[52] || '', // ranA, ranB
       datosTorreA[103] || '', datosTorreB[103] || '', // TransA, TransB
       datosTorreA[4] || '', datosTorreB[4] || '', // ArreA, ArreB
