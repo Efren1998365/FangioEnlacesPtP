@@ -29,20 +29,38 @@ self.onmessage = function(e) {
       ]);
       continue;
     }
+
+    // Aquí debes construir el array filaDatos igual que en el HTML
+    const filaDatos = [
+      idA, datosTorreA[3] || '', datosTorreA[11] || '', datosTorreA[12] || '',
+      '', '', // latArad, lonArad (puedes calcular si quieres)
+      idB, datosTorreB[3] || '', datosTorreB[11] || '', datosTorreB[12] || '',
+      '', '', // latBrad, lonBrad
+      '', '', // distancia, frecuencia
+      '', // disponibilidadAnual
+      datosTorreA[51] || '', datosTorreB[51] || '', // alturaA, alturaB
+      datosTorreA[52] || '', datosTorreB[52] || '', // ranA, ranB
+      datosTorreA[103] || '', datosTorreB[103] || '', // TransA, TransB
+      datosTorreA[4] || '', datosTorreB[4] || '', // ArreA, ArreB
+      datosTorreA[102] || '', datosTorreB[102] || '', // OnA, OnB
+      datosTorreA[21] || '', datosTorreB[21] || '', // TorreA, TorreB
+      datosTorreA[13] || '', datosTorreB[13] || '', // EstadoA, EstadoB
+      '', '', '', '' // factible, antenas, tipoEnlace, análisis
+    ];
+
     resultados.push({
       idA, idB,
       datosA: datosTorreA,
-      datosB: datosTorreB
+      datosB: datosTorreB,
+      filaDatos // <-- ¡Esto es lo que espera tu HTML!
     });
     procesados++;
 
-    // Envía progreso cada batchSize
     if (i % batchSize === 0) {
       self.postMessage({ progreso: i, total: dataPares.length });
     }
   }
 
-  // Al finalizar, envía los resultados
   self.postMessage({
     terminado: true,
     procesados,
