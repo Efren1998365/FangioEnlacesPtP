@@ -915,40 +915,7 @@ body.modo-claro .table-container {
 body.modo-claro .badge-factible { background: #059669; }
 body.modo-claro .badge-nofactible { background: #dc2626; }
 body.modo-claro .badge-indef { background: #f59e42; }
-@media (max-width: 600px) {
-  table, thead, tbody, th, td, tr {
-    display: block;
-  }
-  th, td {
-    padding: 8px 4px;
-    text-align: left;
-  }
-  tr { margin-bottom: 12px; }
-  th { background: #00bcd4; color: #fff; }
-}
-:root {
-  --background: #f4f6fb;
-  --foreground: #1a2236;
-  --primary: #009fe3;
-  --secondary: #f7b32b;
-  --card: #ffffff;
-  --card-shadow: 0 2px 12px rgba(30, 42, 73, 0.08);
-  --button-bg: #009fe3;
-  --button-hover: #007bb8;
-  --button-text: #fff;
-  --input-bg: #f0f4fa;
-  --input-border: #dbeafe;
-}
 
-[data-theme="dark"] {
-  --background: #0a2239;
-  --foreground: #f8fbfd;
-  --primary: #00cfff;
-  --secondary: #eaf8fd;
-  --card: #16213e;
-  --button-bg: #00cfff;
-  --button-text: #0a2239;
-}
   </style>
 </head>
 <body> 
@@ -1136,7 +1103,6 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
         </a>
       </div>
     </div>
-    
   </div>
 </div>
   <div class="fangio-header-decoration"></div>
@@ -1432,12 +1398,6 @@ function mostrarMapaEnlaces(estadoFiltro = null) {
   </div>
 </div>
       <div id="tab-enlaces" class="tab-content">
-        <button class="btn btn-info" onclick="exportarJSON()">
-  <i class="fas fa-file-code"></i> Exportar JSON
-</button>
-<button class="btn btn-secondary" onclick="importarJSON()">
-  <i class="fas fa-file-import"></i> Importar JSON
-</button>
         <div class="enlaces-counter">
           <i class="fas fa-chart-line"></i> Total de Enlaces Registrados: <span id="total-enlaces">0</span>
         </div>
@@ -4094,7 +4054,6 @@ function mostrarGraficoResumen() {
     }
   });
 }
- <canvas id="graficoEstados" width="400" height="180" style="margin:24px auto;display:block;"></canvas>
 const estados = {};
 document.querySelectorAll('#tabla tbody tr').forEach(fila => {
   const estadoA = fila.querySelectorAll('td')[28]?.textContent.trim() || 'N/D';
@@ -4550,48 +4509,8 @@ document.getElementById('toggleThemeBtn').onclick = function() {
 if (localStorage.getItem('fangioTema') === 'claro') {
   document.body.classList.add('modo-claro');
 }
-function exportarJSON() {
-  const enlaces = JSON.parse(localStorage.getItem('enlacesPtP') || '[]');
-  const blob = new Blob([JSON.stringify(enlaces, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'enlaces_ptp.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-function importarJSON() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const enlaces = JSON.parse(e.target.result);
-        localStorage.setItem('enlacesPtP', JSON.stringify(enlaces));
-        cargarEnlacesDeStorage();
-        alert('✅ Datos importados correctamente');
-      } catch {
-        alert('❌ Error al importar JSON');
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-function showToast(msg, color='#222') {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.style.background = color;
-  toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 2500);
-}
 </script>
 
-<div id="toast" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:14px 28px;border-radius:18px;z-index:99999;font-weight:700;box-shadow:0 2px 18px #00e6ff55;"></div>
 </body>
 </html>
            
