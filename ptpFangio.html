@@ -2170,12 +2170,11 @@ if (onAirAPendiente) {
       if (distancia <= 13.5) return '3 pies';
       return 'No factible';
     }
-    if (distancia >= 0 && distancia <= 3) return '1 pie';
+  if (distancia >= 0 && distancia <= 3) return '1 pie';
   if (distancia > 3 && distancia <= 5) return '2 pies';
   if (distancia > 5 && distancia <= 10) return '3 pies';
-  if (distancia > 10 && distancia <= 17) return '4 pies';
-  if (distancia > 17 && distancia <= 50) return '6 pies';
-  return 'No factible';
+  if (distancia > 10 && distancia <= 20) return '4 pies';
+  if (distancia > 20) return '6 pies';
 }
    function validarCapacidadAntena(distancia, diametro, esArrendamiento = false) {
     if (esArrendamiento) {
@@ -2187,8 +2186,6 @@ if (onAirAPendiente) {
   if (diametro === '1 pie') return distancia >= 0 && distancia <= 3;
   if (diametro === '2 pies') return distancia > 3 && distancia <= 5;
   if (diametro === '3 pies') return distancia > 5 && distancia <= 10;
-  if (diametro === '4 pies') return distancia > 10 && distancia <= 17;
-  if (diametro === '6 pies') return distancia > 17 && distancia <= 50;
   return false;
 }
   function esArrendada(tipoArrendamiento) {
@@ -2318,64 +2315,19 @@ if (transANorm === transBNorm) {
   const esArrendadaB = esArrendada(arreBNorm);
 
 if (esArrendadaA || esArrendadaB) {
-  diametroAntena = calcularDiametroAntena(distanciaKm, true);
-  tipoEnlace = 'Torres Arrendadas';
+    diametroAntena = calcularDiametroAntena(distanciaKm, true);
+    tipoEnlace = 'Torres Arrendadas';
 
-  detallesValidacion.push(`📍 Torre A: ${esArrendadaA ? 'Arrendada' : 'Propia'}`);
-  detallesValidacion.push(`📍 Torre B: ${esArrendadaB ? 'Arrendada' : 'Propia'}`);
-  detallesValidacion.push(`📡 Antena asignada: ${diametroAntena} (según distancia)`);
-  const esSatA = esSatelital(transANorm);
-  const esSatB = esSatelital(transBNorm);
-if (permitirMismoTransporte && esSatA && esSatB) {
-  detallesValidacion.push('✅ Permitiendo cualquier combinación de transporte satelital en torres arrendadas. No se exige fibra, pero se respeta el límite de distancia y diámetro de antena.');
-  if (diametroAntena === 'No factible') {
-    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede el rango permitido para torres arrendadas (máx: 13.5km)`);
-    factible = false;
-    razon = `No factible - Distancia excede el rango permitido para torres arrendadas`;
-  } else if (validarCapacidadAntena(distanciaKm, diametroAntena, true)) {
-    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antena de ${diametroAntena}`);
-    factible = true;
-    razon = `Enlace factible - Mismo tipo de transporte satelital permitido (${transA} / ${transB}), distancia: ${distanciaKm.toFixed(2)}km, antenas: ${diametroAntena}`;
-  } else {
-    detallesValidacion.push(`❌ Configuración no válida para torres arrendadas`);
-    razon = `No factible - Distancia excesiva o antena incompatible`;
-    factible = false;
-  }
-  return {
-    factible,
-    razon,
-    diametroAntena,
-    tipoEnlace: 'Mismo Transporte Satelital Arrendada',
-    distancia: distanciaKm,
-    detalles: detallesValidacion
-  };
-}
-  const fibraA = esFibra(transANorm);
-  const satelitalB = esSatelital(transBNorm);
+    detallesValidacion.push(`📍 Torre A: ${esArrendadaA ? 'Arrendada' : 'Propia'}`);
+    detallesValidacion.push(`📍 Torre B: ${esArrendadaB ? 'Arrendada' : 'Propia'}`);
+    detallesValidacion.push(`📡 Antena asignada: ${diametroAntena} (según distancia)`);
 
-  if (!fibraA) {
-    detallesValidacion.push('❌ Torre A debe tener Fibra Óptica');
-  } else {
-    detallesValidacion.push('✅ Torre A tiene Fibra Óptica');
-  }
-  if (!satelitalB) {
-    detallesValidacion.push('❌ Torre B debe tener Starlink u Satelite-OA');
-  } else {
-    detallesValidacion.push('✅ Torre B tiene transporte Satelite-OA');
-  }
-
-  if (diametroAntena === 'No factible') {
-    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede el rango permitido para torres arrendadas (máx: 13.5km)`);
-    factible = false;
-    razon = `No factible - Distancia excede el rango permitido para torres arrendadas`;
-  } else if (
-    (fibraA && satelitalB && validarCapacidadAntena(distanciaKm, diametroAntena, true)) ||
-    (transANorm === transBNorm && validarCapacidadAntena(distanciaKm, diametroAntena, true))
-  ) {
-    detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antena de ${diametroAntena}`);
-    factible = true;
-    razon = `Enlace factible - Configuración arrendada válida, distancia: ${distanciaKm.toFixed(2)}km`;
-    if (diametroAntena === '3 pies') {
+    // Solo 1, 2, 3 pies (3 requiere análisis), 4 o 6 pies NO factible
+    if (diametroAntena === '1 pie' || diametroAntena === '2 pies') {
+      detallesValidacion.push(`✅ Antena de ${diametroAntena} permitida en arrendada`);
+      factible = true;
+      razon = `Enlace factible - Antena de ${diametroAntena} en torre arrendada`;
+    } else if (diametroAntena === '3 pies') {
       detallesValidacion.push('⚠️ Antena de 3 pies en torre arrendada: requiere análisis adicional.');
       return {
         factible: true,
@@ -2386,14 +2338,19 @@ if (permitirMismoTransporte && esSatA && esSatB) {
         detalles: detallesValidacion,
         advertencia: true
       };
+    } else {
+      detallesValidacion.push(`❌ Antena de ${diametroAntena} NO permitida en torre arrendada (solo 1, 2 o 3 pies)`);
+      return {
+        factible: false,
+        razon: `No factible - Solo se permiten antenas de 1, 2 o 3 pies en torres arrendadas`,
+        diametroAntena,
+        tipoEnlace,
+        distancia: distanciaKm,
+        detalles: detallesValidacion
+      };
     }
-  } else {
-    detallesValidacion.push(`❌ Configuración no válida para torres arrendadas`);
-    razon = `No factible - ${!fibraA ? 'Torre A sin fibra' : ''} ${!satelitalB ? 'Torre B sin satelital' : ''} ${!validarCapacidadAntena(distanciaKm, diametroAntena, true) ? 'Distancia excesiva' : ''}`.trim();
-    factible = false;
+    return { factible, razon, diametroAntena, tipoEnlace, distancia: distanciaKm, detalles: detallesValidacion };
   }
-  return { factible, razon, diametroAntena, tipoEnlace, distancia: distanciaKm, detalles: detallesValidacion };
-}
   const esAdquisicionA = esAdquisicion(arreANorm);
   const esAdquisicionB = esAdquisicion(arreBNorm);
   if (esAdquisicionA && esAdquisicionB) {
@@ -2630,19 +2587,19 @@ function analizarFactibilidadPermisiva(distanciaKm, arreA, arreB, transA, transB
     }
   }
   function calcularDiametroAntena(distancia, esArrendamiento = false) {
-    if (esArrendamiento) {
-      if (distancia <= 3.1) return '1 pie';
-      if (distancia <= 8) return '2 pies';
-      if (distancia <= 13.5) return '3 pies';
-      return 'No factible';
-    }
-    if (distancia >= 0 && distancia <= 3) return '1 pie';
-    if (distancia > 3 && distancia <= 5) return '2 pies';
-    if (distancia > 5 && distancia <= 10) return '3 pies';
-    if (distancia > 10 && distancia <= 17) return '4 pies';
-    if (distancia > 17 && distancia <= 50) return '6 pies';
-    return 'No factible';
+  if (esArrendamiento) {
+    if (distancia <= 3.1) return '1 pie';
+    if (distancia <= 8) return '2 pies';
+    if (distancia <= 13.5) return '3 pies';
+    return '4 pies o más'; // Así bloqueas 4 o 6 pies
   }
+  if (distancia >= 0 && distancia <= 3) return '1 pie';
+  if (distancia > 3 && distancia <= 5) return '2 pies';
+  if (distancia > 5 && distancia <= 10) return '3 pies';
+  if (distancia > 10 && distancia <= 20) return '4 pies';
+  if (distancia > 20) return '6 pies';
+  return 'No factible';
+}
   function validarCapacidadAntena(distancia, diametro, esArrendamiento = false) {
     if (esArrendamiento) {
       if (diametro === '1 pie') return distancia <= 3.1;
@@ -2653,8 +2610,6 @@ function analizarFactibilidadPermisiva(distanciaKm, arreA, arreB, transA, transB
     if (diametro === '1 pie') return distancia >= 0 && distancia <= 3;
     if (diametro === '2 pies') return distancia > 3 && distancia <= 5;
     if (diametro === '3 pies') return distancia > 5 && distancia <= 10;
-    if (diametro === '4 pies') return distancia > 10 && distancia <= 17;
-    if (diametro === '6 pies') return distancia > 17 && distancia <= 50;
     return false;
   }
   function esArrendada(tipoArrendamiento) {
@@ -2744,49 +2699,23 @@ if (transANorm === transBNorm) {
 }
   const esArrendadaA = esArrendada(arreANorm);
   const esArrendadaB = esArrendada(arreBNorm);
+// ...dentro de function analizarFactibilidad(...) y function analizarFactibilidadPermisiva(...)
+// Reemplaza el bloque de torres arrendadas por esto:
 
-  if (esArrendadaA || esArrendadaB) {
+if (esArrendadaA || esArrendadaB) {
   diametroAntena = calcularDiametroAntena(distanciaKm, true);
   tipoEnlace = 'Torres Arrendadas';
 
   detallesValidacion.push(`📍 Torre A: ${esArrendadaA ? 'Arrendada' : 'Propia'}`);
   detallesValidacion.push(`📍 Torre B: ${esArrendadaB ? 'Arrendada' : 'Propia'}`);
   detallesValidacion.push(`📡 Antena asignada: ${diametroAntena} (según distancia)`);
-  const esSatA = esSatelital(transANorm);
-  const esSatB = esSatelital(transBNorm);
-  let omitirValidacionFibra = false;
-  if (permitirMismoTransporte && esSatA && esSatB) {
-    detallesValidacion.push('✅ Permitiendo cualquier combinación de transporte satelital en torres arrendadas. No se exige fibra, pero se respeta el límite de distancia y diámetro de antena.');
-    omitirValidacionFibra = true;
-  }
-  if (!omitirValidacionFibra) {
-    const fibraA = esFibra(transANorm);
-    const satelitalB = esSatelital(transBNorm);
 
-    if (!fibraA) {
-      detallesValidacion.push('❌ Torre A debe tener Fibra Óptica');
-    } else {
-      detallesValidacion.push('✅ Torre A tiene Fibra Óptica');
-    }
-    if (!satelitalB) {
-      detallesValidacion.push('❌ Torre B debe tener Starlink u Satelite-OA');
-    } else {
-      detallesValidacion.push('✅ Torre B tiene transporte Satelite-OA');
-    }
-  }
-  if (diametroAntena === 'No factible') {
-  detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km excede el rango permitido para torres arrendadas (máx: 13.5km)`);
-  factible = false;
-  razon = `No factible - Distancia excede el rango permitido para torres arrendadas`;
-} else if (
-  (omitirValidacionFibra && validarCapacidadAntena(distanciaKm, diametroAntena, true)) ||
-  (!omitirValidacionFibra && ((esFibra(transANorm) && esSatelital(transBNorm) && validarCapacidadAntena(distanciaKm, diametroAntena, true)) ||
-  (transANorm === transBNorm && validarCapacidadAntena(distanciaKm, diametroAntena, true))))
-) {
-  detallesValidacion.push(`✅ Distancia ${distanciaKm.toFixed(2)}km compatible con antena de ${diametroAntena}`);
-  factible = true;
-  razon = `Enlace factible - Configuración arrendada válida, distancia: ${distanciaKm.toFixed(2)}km`;
-  if (diametroAntena === '3 pies') {
+  // Solo 1, 2, 3 pies son factibles. 3 pies requiere análisis. 4 o 6 pies NO factible.
+  if (diametroAntena === '1 pie' || diametroAntena === '2 pies') {
+    detallesValidacion.push(`✅ Antena de ${diametroAntena} permitida en arrendada`);
+    factible = true;
+    razon = `Enlace factible - Antena de ${diametroAntena} en torre arrendada`;
+  } else if (diametroAntena === '3 pies') {
     detallesValidacion.push('⚠️ Antena de 3 pies en torre arrendada: requiere análisis adicional.');
     return {
       factible: true,
@@ -2797,14 +2726,20 @@ if (transANorm === transBNorm) {
       detalles: detallesValidacion,
       advertencia: true
     };
+  } else {
+    detallesValidacion.push(`❌ Antena de ${diametroAntena} NO permitida en torre arrendada (solo 1, 2 o 3 pies)`);
+    return {
+      factible: false,
+      razon: `No factible - Solo se permiten antenas de 1, 2 o 3 pies en torres arrendadas`,
+      diametroAntena,
+      tipoEnlace,
+      distancia: distanciaKm,
+      detalles: detallesValidacion
+    };
   }
-} else {
-  detallesValidacion.push(`❌ Configuración no válida para torres arrendadas`);
-  razon = `No factible - ${!omitirValidacionFibra && !esFibra(transANorm) ? 'Torre A sin fibra' : ''} ${!omitirValidacionFibra && !esSatelital(transBNorm) ? 'Torre B sin satelital' : ''} ${!validarCapacidadAntena(distanciaKm, diametroAntena, true) ? 'Distancia excesiva' : ''}`.trim();
-  factible = false;
-}
   return { factible, razon, diametroAntena, tipoEnlace, distancia: distanciaKm, detalles: detallesValidacion };
 }
+ 
   const esAdquisicionA = esAdquisicion(arreANorm);
   const esAdquisicionB = esAdquisicion(arreBNorm);
   if (esAdquisicionA && esAdquisicionB) {
