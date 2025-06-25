@@ -2353,13 +2353,37 @@ if (esArrendadaA || esArrendadaB) {
   }
   const esAdquisicionA = esAdquisicion(arreANorm);
   const esAdquisicionB = esAdquisicion(arreBNorm);
-  if (esAdquisicionA && esAdquisicionB) {
-    tipoEnlace = 'Torres de Adquisición';
-    detallesValidacion.push('🏢 Ambas torres son de adquisición (mayor flexibilidad)');
+ if (esAdquisicionA && esAdquisicionB) {
+  tipoEnlace = 'Torres de Adquisición';
+  detallesValidacion.push('🏢 Ambas torres son de adquisición (mayor flexibilidad)');
+  if (distanciaKm > 50) {
+    factible = false;
+    razon = `No factible - Distancia excesiva (${distanciaKm.toFixed(2)}km > 50km)`;
+    diametroAntena = 'Cualquiera';
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km supera el límite máximo de 50km`);
   } else {
-    tipoEnlace = 'Torres Mixtas';
-    detallesValidacion.push(`🏢 Torre A: ${esAdquisicionA ? 'Adquisición' : 'Otro'}, Torre B: ${esAdquisicionB ? 'Adquisición' : 'Otro'}`);
+    factible = true;
+    razon = `Enlace factible - Torres de adquisición, sin restricción de diámetro de antena`;
+     if (distanciaKm <= 5) {
+      diametroAntena = '1 a 2 pies';
+    } else if (distanciaKm <= 15) {
+      diametroAntena = '3 a 4 pies';
+    } else {
+      diametroAntena = '4 a 6 pies';
+    }
+    detallesValidacion.push(`✅ Antena recomendada para adquisición: ${diametroAntena}`);
   }
+  return {
+    factible,
+    razon,
+    diametroAntena,
+    tipoEnlace,
+    distancia: distanciaKm,
+    detalles: detallesValidacion
+  };
+} else {
+  tipoEnlace = 'Torres Mixtas';
+  detallesValidacion.push(`🏢 Torre A: ${esAdquisicionA ? 'Adquisición' : 'Otro'}, Torre B: ${esAdquisicionB ? 'Adquisición' : 'Otro'}`);
   diametroAntena = calcularDiametroAntena(distanciaKm, false);
   detallesValidacion.push(`📡 Antenas requeridas: ${diametroAntena} (según distancia ${distanciaKm.toFixed(2)}km)`);
   if (validarCapacidadAntena(distanciaKm, diametroAntena)) {
@@ -2371,14 +2395,15 @@ if (esArrendadaA || esArrendadaB) {
     factible = false;
     razon = `No factible - Distancia ${distanciaKm.toFixed(2)}km excede capacidad de antenas ${diametroAntena}`;
   }
-  return { 
-    factible, 
-    razon, 
-    diametroAntena, 
-    tipoEnlace, 
-    distancia: distanciaKm, 
-    detalles: detallesValidacion 
+  return {
+    factible,
+    razon,
+    diametroAntena,
+    tipoEnlace,
+    distancia: distanciaKm,
+    detalles: detallesValidacion
   };
+}
   function verificarLineaDeVista(elevaciones, lineaVista, fresnel) {
   for (let i = 0; i < elevaciones.length; i++) {
     if (elevaciones[i] > fresnel[i]) {
@@ -2742,13 +2767,38 @@ if (esArrendadaA || esArrendadaB) {
  
   const esAdquisicionA = esAdquisicion(arreANorm);
   const esAdquisicionB = esAdquisicion(arreBNorm);
+  
   if (esAdquisicionA && esAdquisicionB) {
-    tipoEnlace = 'Torres de Adquisición';
-    detallesValidacion.push('🏢 Ambas torres son de adquisición (mayor flexibilidad)');
+  tipoEnlace = 'Torres de Adquisición';
+  detallesValidacion.push('🏢 Ambas torres son de adquisición (mayor flexibilidad)');
+  if (distanciaKm > 50) {
+    factible = false;
+    razon = `No factible - Distancia excesiva (${distanciaKm.toFixed(2)}km > 50km)`;
+    diametroAntena = 'Cualquiera';
+    detallesValidacion.push(`❌ Distancia ${distanciaKm.toFixed(2)}km supera el límite máximo de 50km`);
   } else {
-    tipoEnlace = 'Torres Mixtas';
-    detallesValidacion.push(`🏢 Torre A: ${esAdquisicionA ? 'Adquisición' : 'Otro'}, Torre B: ${esAdquisicionB ? 'Adquisición' : 'Otro'}`);
+    factible = true;
+    razon = `Enlace factible - Torres de adquisición, sin restricción de diámetro de antena`;
+     if (distanciaKm <= 5) {
+      diametroAntena = '1 a 2 pies';
+    } else if (distanciaKm <= 15) {
+      diametroAntena = '3 a 4 pies';
+    } else {
+      diametroAntena = '4 a 6 pies';
+    }
+    detallesValidacion.push(`✅ Antena recomendada para adquisición: ${diametroAntena}`);
   }
+  return {
+    factible,
+    razon,
+    diametroAntena,
+    tipoEnlace,
+    distancia: distanciaKm,
+    detalles: detallesValidacion
+  };
+}  else {
+  tipoEnlace = 'Torres Mixtas';
+  detallesValidacion.push(`🏢 Torre A: ${esAdquisicionA ? 'Adquisición' : 'Otro'}, Torre B: ${esAdquisicionB ? 'Adquisición' : 'Otro'}`);
   diametroAntena = calcularDiametroAntena(distanciaKm, false);
   detallesValidacion.push(`📡 Antenas requeridas: ${diametroAntena} (según distancia ${distanciaKm.toFixed(2)}km)`);
   if (validarCapacidadAntena(distanciaKm, diametroAntena)) {
@@ -2768,6 +2818,7 @@ if (esArrendadaA || esArrendadaB) {
     distancia: distanciaKm,
     detalles: detallesValidacion
   };
+}
 }
 
 function verificarLineaDeVista(elevaciones, lineaVista, fresnel) {
